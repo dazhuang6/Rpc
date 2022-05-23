@@ -1,6 +1,6 @@
 package com.wang;
 
-public class RpcFrameworkMain {
+public class RpcFrameworkClientMain {
     public static void main(String[] args) {
         RpcClientProxy rpcClientProxy = new RpcClientProxy("127.0.0.1", 9999);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);

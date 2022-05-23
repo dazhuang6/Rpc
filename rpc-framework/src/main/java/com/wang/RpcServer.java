@@ -1,5 +1,7 @@
 package com.wang;
 
+import com.wang.enumeration.RpcErrorMessageEnum;
+import com.wang.exception.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,12 +30,15 @@ public class RpcServer {
      * @param port 端口
      */
     public void register(Object service, int port){
+        if (null == service) //如果注册服务为空
+            throw new RpcException(RpcErrorMessageEnum.SERVICE_CAN_NOT_BE_NULL);
+
         try (ServerSocket server = new ServerSocket(port)){
             logger.info("server starts...");
             Socket socket;
             while ((socket = server.accept()) != null){
                 logger.info("client connected");
-                threadPool.execute(new WorkerThread(socket, service));//实现了Runnable接口
+                threadPool.execute(new ClientMessageHandlerThread(socket, service));//实现了Runnable接口
             }
         } catch (IOException e){
             logger.error("occur IOException:",e);

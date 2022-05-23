@@ -13,6 +13,7 @@ import java.io.Serializable;
 @Data
 @Builder
 public class RpcRequest implements Serializable {
+    private static final long serialVersionUID = 1905122041950251207L; //自定义序列化ID
 
     private String interfaceName;
     private String methodName;

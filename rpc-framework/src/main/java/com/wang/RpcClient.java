@@ -1,6 +1,10 @@
 package com.wang;
 
 import com.wang.dto.RpcRequest;
+import com.wang.dto.RpcResponse;
+import com.wang.enumeration.RpcErrorMessageEnum;
+import com.wang.enumeration.RpcResponseCode;
+import com.wang.exception.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,10 +22,20 @@ public class RpcClient {
             objectOutputStream.writeObject(rpcRequest);//传给服务端
 
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());//对象输入流
-            return objectInputStream.readObject();//从服务端接收
+
+            RpcResponse rpcResponse = (RpcResponse) objectInputStream.readObject();//将从服务器接收的对象传给RpcResponse
+            if (rpcResponse == null){//说明服务调用失败，抛出调用接口的异常
+                logger.error("调用服务失败，serviceName:{}", rpcRequest.getInterfaceName());
+                throw new RpcException(RpcErrorMessageEnum.SERVICE_INVOCATION_FAILURE, "interfaceName:" + rpcRequest.getInterfaceName());
+            }
+            if (rpcResponse.getCode() == null || !rpcResponse.getCode().equals(RpcResponseCode.SUCCESS.getCode())) {//当服务端的处理结果不是200成功
+                logger.error("调用服务失败,serviceName:{},RpcResponse:{}", rpcRequest.getInterfaceName(), rpcResponse);
+                throw new RpcException(RpcErrorMessageEnum.SERVICE_INVOCATION_FAILURE, "interfaceName:" + rpcRequest.getInterfaceName());
+            }
+
+            return rpcResponse.getData(); //从rpc回复里获取数据
         } catch (IOException | ClassNotFoundException e){
-            logger.error("occur exception:", e);
+            throw new RpcException("调用服务失败：", e);
         }
-        return null;
     }
 }
