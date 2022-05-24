@@ -1,4 +1,4 @@
-package com.wang;
+package com.wang.remoting.socket;
 
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;

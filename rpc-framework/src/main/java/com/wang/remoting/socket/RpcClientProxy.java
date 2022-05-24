@@ -1,4 +1,4 @@
-package com.wang;
+package com.wang.remoting.socket;
 
 import com.wang.dto.RpcRequest;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class RpcClientProxy implements InvocationHandler {
     public <T>T getProxy(Class<T> clazz){
         return (T) Proxy.newProxyInstance(clazz.getClassLoader(), // 类加载器，用于加载代理对象。
                                           new Class<?>[]{clazz}, // 被代理类实现的一些接口；
-                                          RpcClientProxy.this); //实现了 InvocationHandler 接口的对象；
+                                          this); //实现了 InvocationHandler 接口的对象；
     }
 
     /**
