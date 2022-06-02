@@ -1,7 +1,7 @@
 package com.wang;
 
 import com.wang.registry.DefaultServiceRegistry;
-import com.wang.remoting.socket.RpcServer;
+import com.wang.transport.socket.SocketRpcServer;
 
 public class RpcFrameworkServerMain {
     public static void main(String[] args) {
@@ -10,7 +10,7 @@ public class RpcFrameworkServerMain {
         //手动注册
         defaultServiceRegistry.register(helloService);
         //通过注册的服务调用远程服务
-        RpcServer rpcServer = new RpcServer(defaultServiceRegistry);
+        SocketRpcServer rpcServer = new SocketRpcServer();
         rpcServer.start(9998);
 
     }

@@ -1,7 +1,9 @@
 package com.wang.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -10,6 +12,8 @@ import java.io.Serializable;
  * 使用@Builder注解的作用主要是用来生成对象，并且可以为对象链式赋值。
  */
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Builder
 public class RpcRequest implements Serializable {

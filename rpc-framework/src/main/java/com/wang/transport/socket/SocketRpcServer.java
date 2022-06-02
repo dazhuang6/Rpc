@@ -1,7 +1,7 @@
-package com.wang.remoting.socket;
+package com.wang.transport.socket;
 
 import com.wang.registry.ServiceRegistry;
-import com.wang.remoting.RpcRequestHandler;
+import com.wang.transport.RpcRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.*;
 
-public class RpcServer {
+public class SocketRpcServer {
     /**
      * 线程池参数
      */
@@ -20,13 +20,9 @@ public class RpcServer {
     private static final int BLOCKING_QUEUE_CAPACITY = 100;
     private ExecutorService threadPool;
 
-    private static final Logger logger = LoggerFactory.getLogger(RpcServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(SocketRpcServer.class);
 
-    private RpcRequestHandler rpcRequestHandler = new RpcRequestHandler();
-    private final ServiceRegistry serviceRegistry;
-
-    public RpcServer(ServiceRegistry serviceRegistry){ //通过注入服务来调用RpcServer
-        this.serviceRegistry = serviceRegistry;
+    public SocketRpcServer(){ //通过注入服务来调用RpcServer
         BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(BLOCKING_QUEUE_CAPACITY);
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
         this.threadPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE_SIZE, KEEP_ALIVE_TIME, TimeUnit.MINUTES, workQueue, threadFactory);
@@ -43,7 +39,7 @@ public class RpcServer {
             Socket socket;
             while ((socket = server.accept()) != null) {
                 logger.info("client connected");
-                threadPool.execute(new RpcRequestHandlerRunnable(socket, rpcRequestHandler, serviceRegistry));
+                threadPool.execute(new SocketRpcRequestHandlerRunnable(socket));
             }
             threadPool.shutdown();
         } catch (IOException e) {

@@ -17,9 +17,9 @@ public class DefaultServiceRegistry implements ServiceRegistry{
      * key:service/interface name
      * value:service
      */
-    private final Map<String, Object> serviceMap = new ConcurrentHashMap<>(); //使用线程安全的HashMap;
+    private static final Map<String, Object> serviceMap = new ConcurrentHashMap<>(); //使用线程安全的HashMap;
     //ConcurrentHashMap<K, Boolean>的一个包装器,所有映射值都为 Boolean.TRUE
-    private final Set<String> registeredService = ConcurrentHashMap.newKeySet();
+    private static final Set<String> registeredService = ConcurrentHashMap.newKeySet();
 
     /**
      * TODO 修改为扫描注解注册

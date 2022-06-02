@@ -1,10 +1,12 @@
-package com.wang.remoting.socket;
+package com.wang.transport.socket;
 
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
 import com.wang.enumeration.RpcErrorMessageEnum;
 import com.wang.enumeration.RpcResponseCode;
 import com.wang.exception.RpcException;
+import com.wang.transport.RpcClient;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,10 +15,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class RpcClient {
-    private static final Logger logger = LoggerFactory.getLogger(RpcClient.class);
+@AllArgsConstructor
+public class SocketRpcClient implements RpcClient {
+    private static final Logger logger = LoggerFactory.getLogger(SocketRpcClient.class);
+    private String host;
+    private int port;
 
-    public Object sendRpcRequest(RpcRequest rpcRequest, String host, int port){
+    @Override
+    public Object sendRpcRequest(RpcRequest rpcRequest) {
         try (Socket socket = new Socket(host, port)){
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());//对象输出流
             objectOutputStream.writeObject(rpcRequest);//传给服务端

@@ -1,4 +1,4 @@
-package com.wang.remoting.socket;
+package com.wang.transport;
 
 import com.wang.dto.RpcRequest;
 import org.slf4j.Logger;
@@ -13,12 +13,10 @@ import java.lang.reflect.Proxy;
  */
 public class RpcClientProxy implements InvocationHandler {
     private static final Logger logger = LoggerFactory.getLogger(RpcClientProxy.class);
-    private String host;
-    private int port;
+    private RpcClient rpcClient; //因为需要兼顾netty，所以将主机号与端口放在内部
 
-    public RpcClientProxy(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public RpcClientProxy(RpcClient rpcClient) {
+        this.rpcClient = rpcClient;
     }
 
     /**
@@ -28,8 +26,8 @@ public class RpcClientProxy implements InvocationHandler {
     @SuppressWarnings("unchecked") //指示编译器去忽略注解中声明的警告（仅仅编译器阶段，不保留到运行时）
     public <T>T getProxy(Class<T> clazz){
         return (T) Proxy.newProxyInstance(clazz.getClassLoader(), // 类加载器，用于加载代理对象。
-                                          new Class<?>[]{clazz}, // 被代理类实现的一些接口；
-                                          this); //实现了 InvocationHandler 接口的对象；
+                new Class<?>[]{clazz}, // 被代理类实现的一些接口；
+                this); //实现了 InvocationHandler 接口的对象；
     }
 
     /**
@@ -47,7 +45,7 @@ public class RpcClientProxy implements InvocationHandler {
                 .interfaceName(method.getDeclaringClass().getName())
                 .paramTypes(method.getParameterTypes())
                 .build();
-        RpcClient rpcClient = new RpcClient();
-        return rpcClient.sendRpcRequest(rpcRequest, host, port);
+
+        return rpcClient.sendRpcRequest(rpcRequest);
     }
 }

@@ -1,9 +1,10 @@
-package com.wang.remoting.socket;
+package com.wang.transport.socket;
 
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
+import com.wang.registry.DefaultServiceRegistry;
 import com.wang.registry.ServiceRegistry;
-import com.wang.remoting.RpcRequestHandler;
+import com.wang.transport.RpcRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,17 +17,19 @@ import java.net.Socket;
  * 客服端消息处理线程
  * 执行任务需要实现Runnable结果或Callable接口
  */
-public class RpcRequestHandlerRunnable implements Runnable{
-    private static final Logger logger = LoggerFactory.getLogger(RpcRequestHandlerRunnable.class);
+public class SocketRpcRequestHandlerRunnable implements Runnable{
+    private static final Logger logger = LoggerFactory.getLogger(SocketRpcRequestHandlerRunnable.class);
     private Socket socket;
 
-    private RpcRequestHandler rpcRequestHandler;
-    private ServiceRegistry serviceRegistry;
+    private static RpcRequestHandler rpcRequestHandler;
+    private static ServiceRegistry serviceRegistry;
+    static {
+        rpcRequestHandler = new RpcRequestHandler();
+        serviceRegistry = new DefaultServiceRegistry();
+    }
 
-    public RpcRequestHandlerRunnable(Socket socket, RpcRequestHandler rpcRequestHandler, ServiceRegistry serviceRegistry) {
+    public SocketRpcRequestHandlerRunnable(Socket socket) {
         this.socket = socket;
-        this.rpcRequestHandler = rpcRequestHandler;
-        this.serviceRegistry = serviceRegistry;
     }
 
     @Override

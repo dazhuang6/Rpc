@@ -1,10 +1,16 @@
 package com.wang.dto;
 
 import com.wang.enumeration.RpcResponseCode;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Data
 public class RpcResponse<T> implements Serializable { //泛型类
     private static final long serialVersionUID = 715745410605631233L;
