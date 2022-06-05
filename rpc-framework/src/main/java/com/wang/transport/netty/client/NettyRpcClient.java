@@ -6,6 +6,7 @@ import com.wang.serialize.kryo.KryoSerializer;
 import com.wang.transport.RpcClient;
 import com.wang.transport.netty.coder.NettyKryoDecoder;
 import com.wang.transport.netty.coder.NettyKryoEncoder;
+import com.wang.utils.checker.RpcMessageChecker;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -69,9 +70,13 @@ public class NettyRpcClient implements RpcClient {
                         logger.error("send failed:", future.cause());
                 });
                 futureChannel.closeFuture().sync();
-
-                AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse");
+                //回复的key值里包含请求的ID号
+                AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse" + rpcRequest.getRequestId());
                 RpcResponse rpcResponse = futureChannel.attr(key).get();
+
+                //校验 RpcResponse 和 RpcRequest
+                RpcMessageChecker.check(rpcResponse, rpcRequest);
+
                 return rpcResponse.getData();
             }
         } catch (InterruptedException e){

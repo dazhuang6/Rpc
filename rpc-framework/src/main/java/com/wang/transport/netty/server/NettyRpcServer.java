@@ -47,8 +47,8 @@ public class NettyRpcServer {
                     })
                     //设置TCP缓冲区
                     .childOption(ChannelOption.TCP_NODELAY, true)
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .option(ChannelOption.SO_KEEPALIVE, true);
+                    .option(ChannelOption.SO_BACKLOG, 128);
+//                    .option(ChannelOption.SO_KEEPALIVE, true); 会报错，因为这个版本没用这个配置选项
 
             //绑定端口，同步等待绑定成功
             ChannelFuture f = b.bind(port).sync();
