@@ -2,7 +2,7 @@ package com.wang;
 
 import com.wang.transport.RpcClient;
 import com.wang.transport.RpcClientProxy;
-import com.wang.transport.netty.NettyRpcClient;
+import com.wang.transport.netty.client.NettyRpcClient;
 
 public class NettyClientMain {
     public static void main(String[] args) {

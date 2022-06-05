@@ -1,9 +1,11 @@
-package com.wang.transport.netty;
+package com.wang.transport.netty.client;
 
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
 import com.wang.serialize.kryo.KryoSerializer;
 import com.wang.transport.RpcClient;
+import com.wang.transport.netty.coder.NettyKryoDecoder;
+import com.wang.transport.netty.coder.NettyKryoEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -13,6 +15,7 @@ import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//客户端:发送消息到服务端，并接收服务端返回的方法执行结果
 public class NettyRpcClient implements RpcClient {
     private static final Logger logger = LoggerFactory.getLogger(NettyRpcClient.class);
     private String host;

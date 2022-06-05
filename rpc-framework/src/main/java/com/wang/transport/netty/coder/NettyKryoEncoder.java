@@ -1,4 +1,4 @@
-package com.wang.transport.netty;
+package com.wang.transport.netty.coder;
 
 import com.wang.serialize.Serializer;
 import io.netty.buffer.ByteBuf;

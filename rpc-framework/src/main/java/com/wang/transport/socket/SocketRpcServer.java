@@ -1,7 +1,6 @@
 package com.wang.transport.socket;
 
-import com.wang.registry.ServiceRegistry;
-import com.wang.transport.RpcRequestHandler;
+import com.wang.utils.concurrent.ThreadPoolFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,20 +11,14 @@ import java.util.concurrent.*;
 
 public class SocketRpcServer {
     /**
-     * 线程池参数
+     * 使用工具类线程池
      */
-    private static final int CORE_POOL_SIZE = 10;
-    private static final int MAXIMUM_POOL_SIZE_SIZE = 100;
-    private static final int KEEP_ALIVE_TIME = 1;
-    private static final int BLOCKING_QUEUE_CAPACITY = 100;
     private ExecutorService threadPool;
 
     private static final Logger logger = LoggerFactory.getLogger(SocketRpcServer.class);
 
     public SocketRpcServer(){ //通过注入服务来调用RpcServer
-        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(BLOCKING_QUEUE_CAPACITY);
-        ThreadFactory threadFactory = Executors.defaultThreadFactory();
-        this.threadPool = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE_SIZE, KEEP_ALIVE_TIME, TimeUnit.MINUTES, workQueue, threadFactory);
+        threadPool = ThreadPoolFactory.createDefaultThreadPool("socket-server-rpc-pool");
     }
 
     /**

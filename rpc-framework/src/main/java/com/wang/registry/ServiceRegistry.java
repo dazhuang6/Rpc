@@ -1,5 +1,6 @@
 package com.wang.registry;
 
+//服务注册中心接口
 public interface ServiceRegistry {
     /**
      * 代理的服务

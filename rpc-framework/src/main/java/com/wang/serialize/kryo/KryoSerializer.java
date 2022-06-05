@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+//Kryo序列化类，Kryo序列化效率很高，但是只兼容 Java 语言
 public class KryoSerializer implements Serializer {
     private static final Logger logger = LoggerFactory.getLogger(KryoSerializer.class);
 
@@ -20,7 +21,7 @@ public class KryoSerializer implements Serializer {
      * 由于 Kryo 不是线程安全的。每个线程都应该有自己的 Kryo，Input 和 Output 实例。
      * 所以，使用 ThreadLocal 存放 Kryo 对象
      */
-    private static final ThreadLocal<Kryo> kryoThreadLocal = ThreadLocal.withInitial(() -> {
+    private final ThreadLocal<Kryo> kryoThreadLocal = ThreadLocal.withInitial(() -> {
         Kryo kryo = new Kryo();
         kryo.register(RpcResponse.class);
         kryo.register(RpcRequest.class);

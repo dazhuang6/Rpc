@@ -1,8 +1,10 @@
-package com.wang.transport.netty;
+package com.wang.transport.netty.server;
 
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
 import com.wang.serialize.kryo.KryoSerializer;
+import com.wang.transport.netty.coder.NettyKryoDecoder;
+import com.wang.transport.netty.coder.NettyKryoEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -16,6 +18,7 @@ import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//服务端:接收客户端消息，并且根据客户端的消息调用相应的方法，然后返回结果给客户端。
 public class NettyRpcServer {
     private static final Logger logger = LoggerFactory.getLogger(NettyRpcServer.class);
     private final int port;
