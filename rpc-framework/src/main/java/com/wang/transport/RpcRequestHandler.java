@@ -3,6 +3,8 @@ package com.wang.transport;
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
 import com.wang.enumeration.RpcResponseCode;
+import com.wang.registry.DefaultServiceRegistry;
+import com.wang.registry.ServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,9 +13,20 @@ import java.lang.reflect.Method;
 
 public class RpcRequestHandler { //请求处理
     private static final Logger logger = LoggerFactory.getLogger(RpcRequestHandler.class);
+    private static final ServiceRegistry serviceRegistry;
 
-    public Object handle(RpcRequest rpcRequest, Object service){
+    //直接在请求处理阶段调用服务注册信息
+    static {
+        serviceRegistry = new DefaultServiceRegistry();
+    }
+
+    //处理 rpcRequest 然后返回方法执行结果
+    public Object handle(RpcRequest rpcRequest){
         Object result = null;
+
+        //通过注册中心获取到目标类（客户端需要调用类）
+        Object service = serviceRegistry.getService(rpcRequest.getInterfaceName());
+
         try {
             result = invokeTargetMethod(rpcRequest, service);
             logger.info("service:{} successful invoke method:{}", rpcRequest.getInterfaceName(), rpcRequest.getMethodName());

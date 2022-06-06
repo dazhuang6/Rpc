@@ -13,7 +13,7 @@ public class SocketRpcServer {
     /**
      * 使用工具类线程池
      */
-    private ExecutorService threadPool;
+    private final ExecutorService threadPool;
 
     private static final Logger logger = LoggerFactory.getLogger(SocketRpcServer.class);
 

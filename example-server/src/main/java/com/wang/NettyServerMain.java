@@ -1,7 +1,7 @@
 package com.wang;
 
 import com.wang.registry.DefaultServiceRegistry;
-import com.wang.transport.netty.server.NettyRpcServer;
+import com.wang.transport.netty.server.NettyServer;
 
 public class NettyServerMain {
     public static void main(String[] args) {
@@ -9,7 +9,7 @@ public class NettyServerMain {
         DefaultServiceRegistry defaultServiceRegistry = new DefaultServiceRegistry();
 
         defaultServiceRegistry.register(helloService);
-        NettyRpcServer socketRpcServer = new NettyRpcServer(9999);
+        NettyServer socketRpcServer = new NettyServer(9999);
         socketRpcServer.run();
     }
 }

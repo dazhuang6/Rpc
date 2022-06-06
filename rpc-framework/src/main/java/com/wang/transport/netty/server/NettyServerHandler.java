@@ -20,14 +20,13 @@ import java.util.concurrent.ExecutorService;
 public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyServerHandler.class);
-    private static RpcRequestHandler rpcRequestHandler;
-    private static ServiceRegistry serviceRegistry;
-    private static ExecutorService threadPool;
+    private static final RpcRequestHandler rpcRequestHandler;
+    private static final ExecutorService threadPool;
+    private static final String THREAD_NAME_PREFIX = "netty-server-handler-rpc-pool";
 
     static {
         rpcRequestHandler = new RpcRequestHandler();
-        serviceRegistry = new DefaultServiceRegistry();
-        threadPool = ThreadPoolFactory.createDefaultThreadPool("netty-server-handler-rpc-pool");
+        threadPool = ThreadPoolFactory.createDefaultThreadPool(THREAD_NAME_PREFIX);
     }
 
     //使用线程池处理数据
@@ -39,11 +38,9 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
             try {
                 logger.info(String.format("server receive msg: %s", msg));
                 RpcRequest rpcRequest = (RpcRequest) msg;
-                String interfaceName = rpcRequest.getInterfaceName();
-                //通过注册中心获取到目标类（客户端需要调用类）
-                Object service = serviceRegistry.getService(interfaceName);
-                //执行目标方法（客户端需要执行的方法）并且返回方法结果
-                Object result = rpcRequestHandler.handle(rpcRequest, service);
+
+                //请求处理里调用了注册中心，获取了请求的目标类。执行目标方法（客户端需要执行的方法）并且返回方法结果
+                Object result = rpcRequestHandler.handle(rpcRequest);
                 logger.info(String.format("server get result: %s", result.toString()));
                 //返回方法执行结果给客户端
                 ChannelFuture f = ctx.writeAndFlush(RpcResponse.success(result,rpcRequest.getRequestId()));

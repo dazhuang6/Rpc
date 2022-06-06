@@ -11,13 +11,16 @@ import java.util.UUID;
 
 /**
  * JDK静态代理实现InvocationHandler接口和Proxy类
+ * 当动态代理对象调用一个方法的时候，实际调用的是下面的 invoke 方法
  */
 public class RpcClientProxy implements InvocationHandler {
     private static final Logger logger = LoggerFactory.getLogger(RpcClientProxy.class);
-    private RpcClient rpcClient; //因为需要兼顾netty，所以将主机号与端口放在内部
 
-    public RpcClientProxy(RpcClient rpcClient) {
-        this.rpcClient = rpcClient;
+    //用于发送请求给服务端，对应socket和netty两种实现方式
+    private final ClientTransport clientTransport; //因为需要兼顾netty，所以将主机号与端口放在内部
+
+    public RpcClientProxy(ClientTransport clientTransport) {
+        this.clientTransport = clientTransport;
     }
 
     /**
@@ -48,6 +51,6 @@ public class RpcClientProxy implements InvocationHandler {
                 .requestId(UUID.randomUUID().toString()) //生成请求ID
                 .build();
 
-        return rpcClient.sendRpcRequest(rpcRequest);
+        return clientTransport.sendRpcRequest(rpcRequest);
     }
 }

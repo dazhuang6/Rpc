@@ -43,7 +43,7 @@ public class SocketRpcRequestHandlerRunnable implements Runnable{
             //通过注册的服务里寻找接口的实现方法
             String interfaceName = rpcRequest.getInterfaceName();
             Object service = serviceRegistry.getService(interfaceName);
-            Object result = rpcRequestHandler.handle(rpcRequest, service);
+            Object result = rpcRequestHandler.handle(rpcRequest);
 
             oos.writeObject(RpcResponse.success(result, rpcRequest.getRequestId()));//输出流,先输出给Rpc回复
             oos.flush();
