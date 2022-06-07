@@ -1,6 +1,7 @@
-package com.wang.transport;
+package com.wang.proxy;
 
 import com.wang.dto.RpcRequest;
+import com.wang.transport.ClientTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

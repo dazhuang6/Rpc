@@ -2,6 +2,8 @@ package com.wang.transport.netty.client;
 
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
+import com.wang.registry.ServiceRegistry;
+import com.wang.registry.ZkServiceRegistry;
 import com.wang.transport.ClientTransport;
 import com.wang.utils.checker.RpcMessageChecker;
 import io.netty.channel.Channel;
@@ -16,11 +18,10 @@ import java.util.concurrent.atomic.AtomicReference;
 //获取连接，发送请求
 public class NettyClientTransport implements ClientTransport {
     private static final Logger logger = LoggerFactory.getLogger(NettyClientTransport.class);
-    private InetSocketAddress inetSocketAddress;
+    private ServiceRegistry serviceRegistry;
 
-    //InetSocketAddress类主要作用是封装端口,在InetAddress基础上加端口
-    public NettyClientTransport(InetSocketAddress inetSocketAddress) {
-        this.inetSocketAddress = inetSocketAddress;
+    public NettyClientTransport() {
+        this.serviceRegistry = new ZkServiceRegistry();
     }
 
     /**
@@ -34,6 +35,7 @@ public class NettyClientTransport implements ClientTransport {
         //原子引用：意味着多个线程试图改变同一个AtomicReference(例如比较和交换操作)将不会使得AtomicReference处于不一致的状态
         AtomicReference<Object> result = new AtomicReference<>(null);
         try {
+            InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
             Channel channel = ChannelProvider.get(inetSocketAddress);
             if (channel.isActive()) {
                 channel.writeAndFlush(rpcRequest).addListener((ChannelFutureListener) future -> {
@@ -53,6 +55,7 @@ public class NettyClientTransport implements ClientTransport {
                 RpcMessageChecker.check(rpcResponse, rpcRequest);
                 result.set(rpcResponse.getData());
             } else {
+                NettyClient.close();
                 System.exit(0);
             }
 

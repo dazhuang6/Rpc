@@ -1,4 +1,4 @@
-package com.wang.registry;
+package com.wang.provider;
 
 import com.wang.enumeration.RpcErrorMessageEnum;
 import com.wang.exception.RpcException;
@@ -10,11 +10,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 //默认的服务注册中心实现，通过 Map 保存服务信息，可以通过 zookeeper 来改进
-public class DefaultServiceRegistry implements ServiceRegistry{
-    private static final Logger logger = LoggerFactory.getLogger(DefaultServiceRegistry.class);
+public class ServiceProviderImpl implements ServiceProvider {
+    private static final Logger logger = LoggerFactory.getLogger(ServiceProviderImpl.class);
 
     /**
-     * 接口名和服务的对应关系，TODO 处理一个接口被两个实现类实现的情况
+     * 接口名和服务的对应关系
      * key:service/interface name
      * value:service
      */
@@ -23,28 +23,22 @@ public class DefaultServiceRegistry implements ServiceRegistry{
     private static final Set<String> registeredService = ConcurrentHashMap.newKeySet();
 
     /**
-     * TODO 修改为扫描注解注册
      * 将这个对象所有实现的接口都注册进去
      */
     @Override
-    public synchronized <T> void register(T service) { //线程安全
-        String serviceName = service.getClass().getCanonicalName(); //用于返回基础类的授权名称
+    public <T> void addServiceProvider(T service, Class<T> serviceClass) { //线程安全
+        String serviceName = serviceClass.getCanonicalName(); //用于返回基础类的授权名称
         if (registeredService.contains(serviceName)) {
             return;
         }
         registeredService.add(serviceName);
-        Class[] interfaces = service.getClass().getInterfaces(); //获取服务的接口
-        if (interfaces.length == 0) {
-            throw new RpcException(RpcErrorMessageEnum.SERVICE_NOT_IMPLEMENT_ANY_INTERFACE);
-        }
-        for (Class i : interfaces) {
-            serviceMap.put(i.getCanonicalName(), service);
-        }
+        serviceMap.put(serviceName, service);
+
         logger.info("Add service: {} and interfaces:{}", serviceName, service.getClass().getInterfaces());
     }
 
     @Override
-    public synchronized Object getService(String serviceName) { //线程安全
+    public Object getServiceProvider(String serviceName) { //线程安全
         Object service = serviceMap.get(serviceName);
         if (null == service) {
             throw new RpcException(RpcErrorMessageEnum.SERVICE_CAN_NOT_BE_FOUND);

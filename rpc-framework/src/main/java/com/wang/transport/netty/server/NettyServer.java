@@ -2,6 +2,10 @@ package com.wang.transport.netty.server;
 
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
+import com.wang.provider.ServiceProvider;
+import com.wang.provider.ServiceProviderImpl;
+import com.wang.registry.ServiceRegistry;
+import com.wang.registry.ZkServiceRegistry;
 import com.wang.serialize.kryo.KryoSerializer;
 import com.wang.transport.netty.coder.NettyKryoDecoder;
 import com.wang.transport.netty.coder.NettyKryoEncoder;
@@ -18,18 +22,32 @@ import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+
 //服务端:接收客户端消息，并且根据客户端的消息调用相应的方法，然后返回结果给客户端。
 public class NettyServer {
     private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
+    private final String host;
     private final int port;
     private final KryoSerializer kryoSerializer;
+    private final ServiceRegistry serviceRegistry;
+    private final ServiceProvider serviceProvider;
 
-    public NettyServer(int port) {
+    public NettyServer(String host, int port) {
+        this.host = host;
         this.port = port;
         kryoSerializer = new KryoSerializer();
+        serviceRegistry = new ZkServiceRegistry();
+        serviceProvider = new ServiceProviderImpl();
     }
 
-    public void run(){
+    public <T> void publishService(T service, Class<T> serviceClass){
+        serviceProvider.addServiceProvider(service, serviceClass);
+        serviceRegistry.registerService(serviceClass.getCanonicalName(), new InetSocketAddress(host, port));
+        start();
+    }
+
+    public void start(){
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -53,7 +71,7 @@ public class NettyServer {
 //                    .option(ChannelOption.SO_KEEPALIVE, true); 开启TCP底层心跳机制，会报错，因为这个版本没用这个配置选项
 
             //绑定端口，同步等待绑定成功
-            ChannelFuture f = b.bind(port).sync();
+            ChannelFuture f = b.bind(host, port).sync();
             //等待服务端监听窗口关闭
             f.channel().closeFuture().sync();
 

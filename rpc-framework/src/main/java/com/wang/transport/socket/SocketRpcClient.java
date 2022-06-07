@@ -3,6 +3,8 @@ package com.wang.transport.socket;
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
 import com.wang.exception.RpcException;
+import com.wang.registry.ServiceRegistry;
+import com.wang.registry.ZkServiceRegistry;
 import com.wang.transport.ClientTransport;
 import com.wang.utils.checker.RpcMessageChecker;
 import lombok.AllArgsConstructor;
@@ -12,17 +14,23 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 @AllArgsConstructor
 public class SocketRpcClient implements ClientTransport {
     private static final Logger logger = LoggerFactory.getLogger(SocketRpcClient.class);
-    private String host;
-    private int port;
+    private final ServiceRegistry serviceRegistry;
+
+    public SocketRpcClient() {
+        this.serviceRegistry = new ZkServiceRegistry();
+    }
 
     @Override
     public Object sendRpcRequest(RpcRequest rpcRequest) {
-        try (Socket socket = new Socket(host, port)){
+        InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
+        try (Socket socket = new Socket()){
+            socket.connect(inetSocketAddress);//通过inetSocket连接
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());//对象输出流
             objectOutputStream.writeObject(rpcRequest);//传给服务端
 

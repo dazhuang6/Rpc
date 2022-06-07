@@ -1,12 +1,22 @@
 package com.wang.registry;
 
+import java.net.InetSocketAddress;
+
 //服务注册中心接口
 public interface ServiceRegistry {
     /**
-     * 代理的服务
-     * @param service 代理的服务，将接口的实现类注入
+     * 注册服务
+     *
+     * @param serviceName       服务名称
+     * @param inetSocketAddress 提供服务的地址
      */
-    <T> void register (T service);
+    void registerService(String serviceName, InetSocketAddress inetSocketAddress);
 
-    Object getService(String serviceName);
+    /**
+     * 查找服务
+     *
+     * @param serviceName 服务名称
+     * @return 提供服务的地址
+     */
+    InetSocketAddress lookupService(String serviceName);
 }

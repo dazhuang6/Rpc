@@ -2,9 +2,9 @@ package com.wang.transport.socket;
 
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
-import com.wang.registry.DefaultServiceRegistry;
+import com.wang.provider.ServiceProviderImpl;
 import com.wang.registry.ServiceRegistry;
-import com.wang.transport.RpcRequestHandler;
+import com.wang.handler.RpcRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,10 +22,8 @@ public class SocketRpcRequestHandlerRunnable implements Runnable{
     private Socket socket;
 
     private static RpcRequestHandler rpcRequestHandler;
-    private static ServiceRegistry serviceRegistry;
     static {
         rpcRequestHandler = new RpcRequestHandler();
-        serviceRegistry = new DefaultServiceRegistry();
     }
 
     public SocketRpcRequestHandlerRunnable(Socket socket) {
@@ -42,7 +40,6 @@ public class SocketRpcRequestHandlerRunnable implements Runnable{
 
             //通过注册的服务里寻找接口的实现方法
             String interfaceName = rpcRequest.getInterfaceName();
-            Object service = serviceRegistry.getService(interfaceName);
             Object result = rpcRequestHandler.handle(rpcRequest);
 
             oos.writeObject(RpcResponse.success(result, rpcRequest.getRequestId()));//输出流,先输出给Rpc回复
