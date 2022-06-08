@@ -1,5 +1,7 @@
 package com.wang.utils.zk;
 
+import com.wang.exception.RpcException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -15,16 +17,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CuratorHelper {
-    private static final Logger logger = LoggerFactory.getLogger(CuratorHelper.class);
-    private static final int SLEEP_MS_BETWEEN_RETRIES = 100;
+@Slf4j
+public final class CuratorHelper {
+
+    private static final int BASE_SLEEP_TIME = 1000;
     private static final int MAX_RETRIES = 3; //最大重试次数
     private static final String CONNECT_STRING = "127.0.0.1:2181";
-    private static final int CONNECTION_TIMEOUT_MS = 10 * 1000;
-    private static final int SESSION_TIMEOUT_MS = 60 * 1000;
+
     public static final String ZK_REGISTER_ROOT_PATH = "/my-rpc";
     //存放以serviceName为key的所有子节点路径
     private static Map<String, List<String>> serviceAddressMap = new ConcurrentHashMap<>();
+
+    private static CuratorFramework zkClient = getZkClient();
 
     private CuratorHelper() {
     }
@@ -32,36 +36,38 @@ public class CuratorHelper {
     //framework框架， curator监护人
     public static CuratorFramework getZkClient() {
         // 重试策略，重试3次，并在两次重试之间等待100毫秒，以防出现连接问题。
-        RetryPolicy retryPolicy = new RetryNTimes(
-                MAX_RETRIES, SLEEP_MS_BETWEEN_RETRIES);
+        RetryPolicy retryPolicy = new RetryNTimes(BASE_SLEEP_TIME, MAX_RETRIES);
 
-        return CuratorFrameworkFactory.builder()
+        CuratorFramework curatorFramework = CuratorFrameworkFactory.builder()
                 //要连接的服务器(可以是服务器列表)
                 .connectString(CONNECT_STRING)
                 .retryPolicy(retryPolicy)
-                //连接超时时间，10秒
-                .connectionTimeoutMs(CONNECTION_TIMEOUT_MS)
-                //会话超时时间，60秒
-                .sessionTimeoutMs(SESSION_TIMEOUT_MS)
                 .build();
+        curatorFramework.start();
+        return curatorFramework;
     }
 
     /**
      * 创建临时节点
      * 临时节点驻存在ZooKeeper中，当连接和session断掉时被删除。
      */
-    public static void creatEphemeralNode(final CuratorFramework zkClient, final String path) {
+    public static void creatEphemeralNode(String path) {
         try {
-            zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path);
+            if (zkClient.checkExists().forPath(path) == null) {
+                zkClient.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path);
+                log.info("节点创建成功，节点为:[{}]", path);
+            } else {
+                log.info("节点已经存在，节点为:[{}]", path);
+            }
         } catch (Exception e) {
-            logger.error("occur exception:", e);
+            throw new RpcException(e.getMessage(), e.getCause());
         }
     }
 
     /**
      * 获取某个字节下的子节点,也就是获取所有提供服务的生产者的地址
      */
-    public static List<String> getChildrenNodes(final CuratorFramework zkClient, final String serviceName){
+    public static List<String> getChildrenNodes(String serviceName){
         if (serviceAddressMap.containsKey(serviceName)) {
             return serviceAddressMap.get(serviceName);
         }
@@ -72,7 +78,7 @@ public class CuratorHelper {
             serviceAddressMap.put(serviceName, result);
             registerWatcher(zkClient, serviceName); //对该节点注册监听器
         } catch (Exception e){
-            logger.error("occur exception:", e);
+            throw new RpcException(e.getMessage(), e.getCause());
         }
         return result;
     }
@@ -93,7 +99,7 @@ public class CuratorHelper {
         try {
             pathChildrenCache.start();
         } catch (Exception e){
-            logger.error("occur exception:", e);
+            log.error("occur exception:", e);
         }
     }
 }

@@ -10,14 +10,15 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
 //客户端:发送消息到服务端，并接收服务端返回的方法执行结果
-public class NettyClient {
-    private static final Logger logger = LoggerFactory.getLogger(NettyClient.class);
+@Slf4j
+public final class NettyClient {
 
     private static final Bootstrap b; //引导启动类
     private static final EventLoopGroup eventLoopGroup;
@@ -52,7 +53,7 @@ public class NettyClient {
     }
 
     public static void close() {
-        logger.info("call close method");
+        log.info("call close method");
         eventLoopGroup.shutdownGracefully();
     }
 

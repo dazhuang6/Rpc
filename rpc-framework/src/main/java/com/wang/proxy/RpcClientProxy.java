@@ -2,6 +2,7 @@ package com.wang.proxy;
 
 import com.wang.dto.RpcRequest;
 import com.wang.transport.ClientTransport;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +15,8 @@ import java.util.UUID;
  * JDK静态代理实现InvocationHandler接口和Proxy类
  * 当动态代理对象调用一个方法的时候，实际调用的是下面的 invoke 方法
  */
+@Slf4j
 public class RpcClientProxy implements InvocationHandler {
-    private static final Logger logger = LoggerFactory.getLogger(RpcClientProxy.class);
 
     //用于发送请求给服务端，对应socket和netty两种实现方式
     private final ClientTransport clientTransport; //因为需要兼顾netty，所以将主机号与端口放在内部
@@ -44,7 +45,7 @@ public class RpcClientProxy implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        logger.info("Call invoke method and invoked method: {}", method.getName());
+        log.info("Call invoke method and invoked method: {}", method.getName());
         RpcRequest rpcRequest = RpcRequest.builder().methodName(method.getName())
                 .parameters(args)
                 .interfaceName(method.getDeclaringClass().getName())

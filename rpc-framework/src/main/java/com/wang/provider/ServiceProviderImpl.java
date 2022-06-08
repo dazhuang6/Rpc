@@ -2,6 +2,7 @@ package com.wang.provider;
 
 import com.wang.enumeration.RpcErrorMessageEnum;
 import com.wang.exception.RpcException;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,17 +11,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 //默认的服务注册中心实现，通过 Map 保存服务信息，可以通过 zookeeper 来改进
+@Slf4j
 public class ServiceProviderImpl implements ServiceProvider {
-    private static final Logger logger = LoggerFactory.getLogger(ServiceProviderImpl.class);
 
     /**
      * 接口名和服务的对应关系
      * key:service/interface name
      * value:service
      */
-    private static final Map<String, Object> serviceMap = new ConcurrentHashMap<>(); //使用线程安全的HashMap;
+    private static Map<String, Object> serviceMap = new ConcurrentHashMap<>(); //使用线程安全的HashMap;
     //ConcurrentHashMap<K, Boolean>的一个包装器,所有映射值都为 Boolean.TRUE
-    private static final Set<String> registeredService = ConcurrentHashMap.newKeySet();
+    private static Set<String> registeredService = ConcurrentHashMap.newKeySet();
 
     /**
      * 将这个对象所有实现的接口都注册进去
@@ -34,7 +35,7 @@ public class ServiceProviderImpl implements ServiceProvider {
         registeredService.add(serviceName);
         serviceMap.put(serviceName, service);
 
-        logger.info("Add service: {} and interfaces:{}", serviceName, service.getClass().getInterfaces());
+        log.info("Add service: {} and interfaces:{}", serviceName, service.getClass().getInterfaces());
     }
 
     @Override

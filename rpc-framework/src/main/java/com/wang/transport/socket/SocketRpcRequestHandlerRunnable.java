@@ -5,6 +5,7 @@ import com.wang.dto.RpcResponse;
 import com.wang.provider.ServiceProviderImpl;
 import com.wang.registry.ServiceRegistry;
 import com.wang.handler.RpcRequestHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,22 +18,21 @@ import java.net.Socket;
  * 客服端消息处理线程
  * 执行任务需要实现Runnable结果或Callable接口
  */
+@Slf4j
 public class SocketRpcRequestHandlerRunnable implements Runnable{
-    private static final Logger logger = LoggerFactory.getLogger(SocketRpcRequestHandlerRunnable.class);
+
     private Socket socket;
 
-    private static RpcRequestHandler rpcRequestHandler;
-    static {
-        rpcRequestHandler = new RpcRequestHandler();
-    }
+    private RpcRequestHandler rpcRequestHandler;
 
     public SocketRpcRequestHandlerRunnable(Socket socket) {
         this.socket = socket;
+        this.rpcRequestHandler = new RpcRequestHandler();
     }
 
     @Override
     public void run() {
-        logger.info(String.format("server handle message from client by thread: %s", Thread.currentThread().getName()));
+        log.info("server handle message from client by thread: [{}]", Thread.currentThread().getName());
         //try-with-resources
         try (ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
              ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream())){
@@ -45,7 +45,7 @@ public class SocketRpcRequestHandlerRunnable implements Runnable{
             oos.writeObject(RpcResponse.success(result, rpcRequest.getRequestId()));//输出流,先输出给Rpc回复
             oos.flush();
         } catch (IOException | ClassNotFoundException e){
-            logger.error("occur exception:", e);
+            log.error("occur exception:", e);
         }
     }
 }

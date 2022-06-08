@@ -3,11 +3,14 @@ package com.wang.transport.socket;
 import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
 import com.wang.exception.RpcException;
+import com.wang.registry.ServiceDiscovery;
 import com.wang.registry.ServiceRegistry;
+import com.wang.registry.ZkServiceDiscovery;
 import com.wang.registry.ZkServiceRegistry;
 import com.wang.transport.ClientTransport;
 import com.wang.utils.checker.RpcMessageChecker;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,17 +21,18 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 @AllArgsConstructor
+@Slf4j
 public class SocketRpcClient implements ClientTransport {
-    private static final Logger logger = LoggerFactory.getLogger(SocketRpcClient.class);
-    private final ServiceRegistry serviceRegistry;
+
+    private final ServiceDiscovery serviceDiscovery;
 
     public SocketRpcClient() {
-        this.serviceRegistry = new ZkServiceRegistry();
+        this.serviceDiscovery = new ZkServiceDiscovery();
     }
 
     @Override
     public Object sendRpcRequest(RpcRequest rpcRequest) {
-        InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
+        InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcRequest.getInterfaceName());
         try (Socket socket = new Socket()){
             socket.connect(inetSocketAddress);//通过inetSocket连接
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());//对象输出流
@@ -42,7 +46,7 @@ public class SocketRpcClient implements ClientTransport {
 
             return rpcResponse.getData(); //从rpc回复里获取数据
         } catch (IOException | ClassNotFoundException e){
-            logger.error("occur exception when send sendRpcRequest");
+            log.error("occur exception when send sendRpcRequest");
             throw new RpcException("调用服务失败：", e);
         }
     }

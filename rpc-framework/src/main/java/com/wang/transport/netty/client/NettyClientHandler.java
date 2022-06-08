@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,15 +14,15 @@ import org.slf4j.LoggerFactory;
  * 避免可能导致的内存泄露问题。
  */
 //自定义客户端 ChannelHandler 来处理服务端发过来的数据
+@Slf4j
 public class NettyClientHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = LoggerFactory.getLogger(NettyClientHandler.class);
 
     //读取服务端传输的消息
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
-            logger.info(String.format("client receive msg: %s", msg));
+            log.info(String.format("client receive msg: %s", msg));
             RpcResponse rpcResponse = (RpcResponse) msg;
 
             //声明一个AttributeKey对象
@@ -38,7 +39,7 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
     //处理客户端消息发生异常的时候被调用
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("client catch exception");
+        log.error("client catch exception");
         cause.printStackTrace();
         ctx.close();
     }

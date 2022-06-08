@@ -7,6 +7,7 @@ import com.wang.dto.RpcRequest;
 import com.wang.dto.RpcResponse;
 import com.wang.exception.SerializeException;
 import com.wang.serialize.Serializer;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +15,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 //Kryo序列化类，Kryo序列化效率很高，但是只兼容 Java 语言
+@Slf4j
 public class KryoSerializer implements Serializer {
-    private static final Logger logger = LoggerFactory.getLogger(KryoSerializer.class);
 
     /**
      * 由于 Kryo 不是线程安全的。每个线程都应该有自己的 Kryo，Input 和 Output 实例。
@@ -41,7 +42,7 @@ public class KryoSerializer implements Serializer {
 
             return output.toBytes();
         } catch (Exception e){
-            logger.error("occur exception when serialize:", e);
+            log.error("occur exception when serialize:", e);
             throw new SerializeException("序列化失败");
         }
     }
@@ -57,7 +58,7 @@ public class KryoSerializer implements Serializer {
             return clazz.cast(o);//强制类型转换
 
         } catch (Exception e){
-            logger.error("occur exception when deserialize:", e);
+            log.error("occur exception when deserialize:", e);
             throw new SerializeException("反序列化失败");
         }
     }

@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.*;
 
 //创建 ThreadPool(线程池) 的工具类.
-public class ThreadPoolFactory {
+public final class ThreadPoolFactory {
     /**
      * 线程池参数
      */
