@@ -1,7 +1,6 @@
 package com.wang;
 
-import com.wang.provider.ServiceProviderImpl;
-import com.wang.transport.netty.server.NettyServer;
+import com.wang.remoting.transport.netty.server.NettyServer;
 
 public class NettyServerMain {
     public static void main(String[] args) {

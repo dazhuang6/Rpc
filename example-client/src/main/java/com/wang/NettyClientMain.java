@@ -1,10 +1,8 @@
 package com.wang;
 
-import com.wang.transport.ClientTransport;
+import com.wang.remoting.transport.ClientTransport;
 import com.wang.proxy.RpcClientProxy;
-import com.wang.transport.netty.client.NettyClientTransport;
-
-import java.net.InetSocketAddress;
+import com.wang.remoting.transport.netty.client.NettyClientTransport;
 
 public class NettyClientMain {
     public static void main(String[] args) {

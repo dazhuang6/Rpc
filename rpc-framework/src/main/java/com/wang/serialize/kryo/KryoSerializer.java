@@ -3,13 +3,11 @@ package com.wang.serialize.kryo;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.wang.dto.RpcRequest;
-import com.wang.dto.RpcResponse;
+import com.wang.remoting.dto.RpcRequest;
+import com.wang.remoting.dto.RpcResponse;
 import com.wang.exception.SerializeException;
 import com.wang.serialize.Serializer;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

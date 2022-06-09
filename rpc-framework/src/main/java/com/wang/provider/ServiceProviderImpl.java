@@ -10,7 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-//默认的服务注册中心实现，通过 Map 保存服务信息，可以通过 zookeeper 来改进
+/**
+ * 实现了 ServiceProvider 接口，可以将其看做是一个保存和提供服务实例对象的示例
+ * 默认的服务注册中心实现，通过 Map 保存服务信息，可以通过 zookeeper 来改进
+ */
 @Slf4j
 public class ServiceProviderImpl implements ServiceProvider {
 

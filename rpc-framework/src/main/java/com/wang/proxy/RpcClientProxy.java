@@ -1,10 +1,8 @@
 package com.wang.proxy;
 
-import com.wang.dto.RpcRequest;
-import com.wang.transport.ClientTransport;
+import com.wang.remoting.dto.RpcRequest;
+import com.wang.remoting.transport.ClientTransport;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

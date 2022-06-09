@@ -1,8 +1,8 @@
 package com.wang;
 
-import com.wang.transport.ClientTransport;
+import com.wang.remoting.transport.ClientTransport;
 import com.wang.proxy.RpcClientProxy;
-import com.wang.transport.socket.SocketRpcClient;
+import com.wang.remoting.transport.socket.SocketRpcClient;
 
 public class RpcFrameworkClientMain {
     public static void main(String[] args) {
