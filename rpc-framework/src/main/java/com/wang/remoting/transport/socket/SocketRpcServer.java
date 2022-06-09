@@ -1,5 +1,6 @@
 package com.wang.remoting.transport.socket;
 
+import com.wang.config.CustomShutdownHook;
 import com.wang.provider.ServiceProvider;
 import com.wang.provider.ServiceProviderImpl;
 import com.wang.registry.ServiceRegistry;
@@ -46,10 +47,11 @@ public class SocketRpcServer {
 
         try (ServerSocket server = new ServerSocket()) {
             server.bind(new InetSocketAddress(host, port));
+            CustomShutdownHook.getCustomShutdownHook().clearAll();
             log.info("server starts...");
             Socket socket;
             while ((socket = server.accept()) != null) {
-                log.info("client connected");
+                log.info("client connected [{}]", socket.getInetAddress());
                 threadPool.execute(new SocketRpcRequestHandlerRunnable(socket));
             }
             threadPool.shutdown();
