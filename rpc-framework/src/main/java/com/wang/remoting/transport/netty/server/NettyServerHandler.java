@@ -1,12 +1,10 @@
 package com.wang.remoting.transport.netty.server;
 
+import com.wang.factory.SingletonFactory;
+import com.wang.handler.RpcRequestHandler;
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
-import com.wang.handler.RpcRequestHandler;
 import com.wang.utils.concurrent.ThreadPoolFactoryUtils;
-import com.wang.factory.SingletonFactory;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
@@ -42,8 +40,12 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                 Object result = rpcRequestHandler.handle(rpcRequest);
                 log.info(String.format("server get result: %s", result.toString()));
                 //返回方法执行结果给客户端
-                ChannelFuture f = ctx.writeAndFlush(RpcResponse.success(result,rpcRequest.getRequestId()));
-                f.addListener(ChannelFutureListener.CLOSE);
+                if (ctx.channel().isActive() && ctx.channel().isWritable()) {
+                    ctx.writeAndFlush(RpcResponse.success(result,rpcRequest.getRequestId()));
+                } else {
+                    log.error("not writable now, message dropped");
+                }
+
             } finally {
                 //确保 ByteBuf 被释放，不然可能会有内存泄露问题
                 ReferenceCountUtil.release(msg);

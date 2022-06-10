@@ -1,13 +1,18 @@
 package com.wang.proxy;
 
 import com.wang.remoting.dto.RpcRequest;
+import com.wang.remoting.dto.RpcResponse;
 import com.wang.remoting.transport.ClientTransport;
+import com.wang.remoting.transport.netty.client.NettyClientTransport;
+import com.wang.remoting.transport.socket.SocketRpcClient;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * JDK静态代理实现InvocationHandler接口和Proxy类
@@ -41,6 +46,8 @@ public class RpcClientProxy implements InvocationHandler {
      * @param method 与代理类对象调用的方法相对应
      * @param args 当前 method 方法的参数
      */
+    @SneakyThrows //偷偷抛出异常
+    @SuppressWarnings("unchecked")
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         log.info("Call invoke method and invoked method: {}", method.getName());
@@ -51,6 +58,16 @@ public class RpcClientProxy implements InvocationHandler {
                 .requestId(UUID.randomUUID().toString()) //生成请求ID
                 .build();
 
-        return clientTransport.sendRpcRequest(rpcRequest);
+        Object result = null;
+        if (clientTransport instanceof NettyClientTransport){
+            CompletableFuture<RpcResponse> completableFuture =
+                    (CompletableFuture<RpcResponse>) clientTransport.sendRpcRequest(rpcRequest);
+            result = completableFuture.get().getData(); //获取future的结果，结果就是其泛型
+        }
+        if (clientTransport instanceof SocketRpcClient) {
+            RpcResponse rpcResponse = (RpcResponse) clientTransport.sendRpcRequest(rpcRequest);
+            result = rpcResponse.getData();
+        }
+        return result;
     }
 }

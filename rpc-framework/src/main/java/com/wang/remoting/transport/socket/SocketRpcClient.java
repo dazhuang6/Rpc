@@ -40,7 +40,7 @@ public class SocketRpcClient implements ClientTransport {
             //通过common里的统一校验rpcResponse和rpcRequest
             RpcMessageChecker.check(rpcResponse, rpcRequest);
 
-            return rpcResponse.getData(); //从rpc回复里获取数据
+            return rpcResponse; //从rpc回复里获取数据
         } catch (IOException | ClassNotFoundException e){
             throw new RpcException("调用服务失败：", e);
         }
