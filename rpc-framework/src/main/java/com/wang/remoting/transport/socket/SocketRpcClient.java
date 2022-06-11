@@ -1,12 +1,10 @@
 package com.wang.remoting.transport.socket;
 
-import com.wang.remoting.dto.RpcRequest;
-import com.wang.remoting.dto.RpcResponse;
 import com.wang.exception.RpcException;
 import com.wang.registry.ServiceDiscovery;
 import com.wang.registry.ZkServiceDiscovery;
+import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.transport.ClientTransport;
-import com.wang.remoting.dto.RpcMessageChecker;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,11 +34,7 @@ public class SocketRpcClient implements ClientTransport {
 
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());//对象输入流
 
-            RpcResponse rpcResponse = (RpcResponse) objectInputStream.readObject();//将从服务器接收的对象传给RpcResponse
-            //通过common里的统一校验rpcResponse和rpcRequest
-            RpcMessageChecker.check(rpcResponse, rpcRequest);
-
-            return rpcResponse; //从rpc回复里获取数据
+            return objectInputStream.readObject();//将从服务器接收的对象传给RpcResponse
         } catch (IOException | ClassNotFoundException e){
             throw new RpcException("调用服务失败：", e);
         }

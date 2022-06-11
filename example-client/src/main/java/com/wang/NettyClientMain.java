@@ -14,8 +14,10 @@ public class NettyClientMain {
         //如需使用 assert 断言，需要在 VM options 添加参数：-ea
         //assert "Hello description is 222".equals(hello);
 
-        //System.out.println("上面的调用卡住之后，这里也不会调用了");
-        String hello2 = helloService.hello(new Hello("222", "333"));
-        System.out.println(hello2);
+        //System.out.println("上面的调用卡住之后，这里也不会调用了");使用zookeeper后就可以了
+        for (int i = 0; i < 50; i++) {
+            String des = helloService.hello(new Hello("111", "~~~" + i));
+            System.out.println(des);
+        }
     }
 }

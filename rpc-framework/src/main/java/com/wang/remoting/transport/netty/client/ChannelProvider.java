@@ -21,9 +21,10 @@ public final class ChannelProvider {
     private ChannelProvider() {
     }
 
+    //重用Channel避免重复连接服务端
     public static Channel get(InetSocketAddress inetSocketAddress) {
         String key = inetSocketAddress.toString();
-        // 已经由可用连接就直接取
+        // 已经有可用连接就直接取
         if (channels.containsKey(key)) {
             Channel channel = channels.get(key);
             if (channel != null && channel.isActive()) {

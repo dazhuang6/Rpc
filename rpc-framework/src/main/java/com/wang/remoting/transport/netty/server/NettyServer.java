@@ -49,6 +49,8 @@ public class NettyServer {
     }
 
     public void start(){
+        //取消注册服务
+        CustomShutdownHook.getCustomShutdownHook().clearAll();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -73,14 +75,13 @@ public class NettyServer {
 
             //绑定端口，同步等待绑定成功
             ChannelFuture f = b.bind(host, port).sync();
-            //取消注册服务
-            CustomShutdownHook.getCustomShutdownHook().clearAll();
             //等待服务端监听窗口关闭
             f.channel().closeFuture().sync();
 
         } catch (InterruptedException e){
             log.error("occur exception when start server:", e);
         } finally {
+            log.error("shutdown bossGroup and workerGroup");
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }

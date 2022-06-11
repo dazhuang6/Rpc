@@ -52,6 +52,7 @@ public final class NettyClient {
                 });
     }
 
+    //使用completeFuture<Channel>连接Channel，等其完成后通过get方法获取
     @SneakyThrows
     public Channel doConnect(InetSocketAddress inetSocketAddress) {
         CompletableFuture<Channel> completableFuture = new CompletableFuture<>();

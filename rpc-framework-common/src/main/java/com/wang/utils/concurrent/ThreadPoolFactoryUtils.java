@@ -1,20 +1,66 @@
 package com.wang.utils.concurrent;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
 import java.util.concurrent.*;
 
 //创建 ThreadPool(线程池) 的工具类.
+@Slf4j
 public final class ThreadPoolFactoryUtils {
-    /**
-     * 线程池参数
-     */
-    private static final int CORE_POOL_SIZE = 10;
-    private static final int MAXIMUM_POOL_SIZE_SIZE = 100;
-    private static final int KEEP_ALIVE_TIME = 1;
-    private static final int BLOCKING_QUEUE_CAPACITY = 100;
+
+    private static Map<String, ExecutorService> threadPools = new ConcurrentHashMap<>();
 
     private ThreadPoolFactoryUtils(){};
+
+    public static ExecutorService createCustomThreadPoolIfAbsent(String threadNamePrefix) {
+        CustomThreadPoolConfig customThreadPoolConfig = new CustomThreadPoolConfig();
+        return createCustomThreadPoolIfAbsent(customThreadPoolConfig, threadNamePrefix, false);
+    }
+
+    public static ExecutorService createCustomThreadPoolIfAbsent(String threadNamePrefix, CustomThreadPoolConfig customThreadPoolConfig) {
+        return createCustomThreadPoolIfAbsent(customThreadPoolConfig, threadNamePrefix, false);
+    }
+
+    public static ExecutorService createCustomThreadPoolIfAbsent(CustomThreadPoolConfig customThreadPoolConfig, String threadNamePrefix, Boolean daemon) {
+        ExecutorService threadPool = threadPools.computeIfAbsent(threadNamePrefix, k -> createThreadPool(customThreadPoolConfig, threadNamePrefix, daemon));
+        // 如果 threadPool 被 shutdown 的话就重新创建一个
+        if (threadPool.isShutdown() || threadPool.isTerminated()) {
+            threadPools.remove(threadNamePrefix);
+            threadPool = createThreadPool(customThreadPoolConfig, threadNamePrefix, daemon);
+            threadPools.put(threadNamePrefix, threadPool);
+        }
+        return threadPool;
+    }
+
+    /**
+     * shutDown 所有线程池
+     */
+    public static void shutDownAllThreadPool() {
+        log.info("call shutDownAllThreadPool method");
+        threadPools.entrySet().parallelStream().forEach(entry -> {
+            ExecutorService executorService = entry.getValue();
+            executorService.shutdown();
+            log.info("shut down thread pool [{}] [{}]", entry.getKey(), executorService.isTerminated());
+            try {
+                executorService.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException ie) {
+                log.error("Thread pool never terminated");
+                executorService.shutdownNow();
+            }
+        });
+    }
+
+    /**
+     * 通过自定义创建的格式工厂，再利用ThreadPoolExecutor创建线程池
+     */
+    private static ExecutorService createThreadPool(CustomThreadPoolConfig customThreadPoolConfig, String threadNamePrefix, Boolean daemon) {
+        ThreadFactory threadFactory = createThreadFactory(threadNamePrefix, daemon);
+        return new ThreadPoolExecutor(customThreadPoolConfig.getCorePoolSize(), customThreadPoolConfig.getMaximumPoolSize(),
+                customThreadPoolConfig.getKeepAliveTime(), customThreadPoolConfig.getUnit(), customThreadPoolConfig.getWorkQueue(),
+                threadFactory);
+    }
 
     /**
      * 创建 ThreadFactory 。如果threadNamePrefix不为空则使用自建ThreadFactory，否则使用defaultThreadFactory
@@ -32,18 +78,6 @@ public final class ThreadPoolFactoryUtils {
             }
         }
         return Executors.defaultThreadFactory();
-    }
-
-    public static ExecutorService createDefaultThreadPool(String threadNamePrefix, Boolean daemon) {
-        // 使用有界队列
-        BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(BLOCKING_QUEUE_CAPACITY);
-        ThreadFactory threadFactory = createThreadFactory(threadNamePrefix, daemon);
-        return new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE_SIZE, KEEP_ALIVE_TIME, TimeUnit.MINUTES, workQueue, threadFactory);
-    }
-
-    //守护线程默认关闭
-    public static ExecutorService createDefaultThreadPool(String threadNamePrefix) {
-        return createDefaultThreadPool(threadNamePrefix, false);
     }
 
 }

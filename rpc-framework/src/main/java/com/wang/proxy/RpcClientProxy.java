@@ -1,5 +1,6 @@
 package com.wang.proxy;
 
+import com.wang.remoting.dto.RpcMessageChecker;
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
 import com.wang.remoting.transport.ClientTransport;
@@ -50,7 +51,7 @@ public class RpcClientProxy implements InvocationHandler {
     @SuppressWarnings("unchecked")
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        log.info("Call invoke method and invoked method: {}", method.getName());
+        log.info("invoked method: [{}]", method.getName());
         RpcRequest rpcRequest = RpcRequest.builder().methodName(method.getName())
                 .parameters(args)
                 .interfaceName(method.getDeclaringClass().getName())
@@ -58,16 +59,18 @@ public class RpcClientProxy implements InvocationHandler {
                 .requestId(UUID.randomUUID().toString()) //生成请求ID
                 .build();
 
-        Object result = null;
+        RpcResponse rpcResponse = null;
         if (clientTransport instanceof NettyClientTransport){
             CompletableFuture<RpcResponse> completableFuture =
                     (CompletableFuture<RpcResponse>) clientTransport.sendRpcRequest(rpcRequest);
-            result = completableFuture.get().getData(); //获取future的结果，结果就是其泛型
+            rpcResponse = completableFuture.get(); //获取future的结果，结果就是其泛型
         }
         if (clientTransport instanceof SocketRpcClient) {
-            RpcResponse rpcResponse = (RpcResponse) clientTransport.sendRpcRequest(rpcRequest);
-            result = rpcResponse.getData();
+            rpcResponse = (RpcResponse) clientTransport.sendRpcRequest(rpcRequest);
         }
-        return result;
+
+        //校验 RpcResponse 和 RpcRequest
+        RpcMessageChecker.check(rpcResponse, rpcRequest);
+        return rpcResponse.getData();
     }
 }

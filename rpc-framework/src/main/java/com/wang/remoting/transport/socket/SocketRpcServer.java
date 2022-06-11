@@ -29,7 +29,7 @@ public class SocketRpcServer {
     public SocketRpcServer(String host, int port) { //通过注入服务来调用RpcServer
         this.host = host;
         this.port = port;
-        threadPool = ThreadPoolFactoryUtils.createDefaultThreadPool("socket-server-rpc-pool");
+        threadPool = ThreadPoolFactoryUtils.createCustomThreadPoolIfAbsent("socket-server-rpc-pool");
         serviceRegistry = new ZkServiceRegistry();
         serviceProvider = new ServiceProviderImpl();
     }
