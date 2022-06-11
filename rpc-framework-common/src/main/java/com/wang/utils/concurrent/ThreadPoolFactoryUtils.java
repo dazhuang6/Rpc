@@ -9,6 +9,12 @@ import java.util.concurrent.*;
 //创建 ThreadPool(线程池) 的工具类.
 @Slf4j
 public final class ThreadPoolFactoryUtils {
+    /**
+     * 通过 threadNamePrefix 来区分不同线程池（我们可以把相同 threadNamePrefix 的线程池看作是为同一业务场景服务）。
+     * TODO :通过信号量机制( {@link Semaphore} 满足条件)限制创建的线程池数量（线程池和线程不是越多越好）
+     * key: threadNamePrefix
+     * value: threadPool
+     */
 
     private static Map<String, ExecutorService> threadPools = new ConcurrentHashMap<>();
 
@@ -45,7 +51,7 @@ public final class ThreadPoolFactoryUtils {
             log.info("shut down thread pool [{}] [{}]", entry.getKey(), executorService.isTerminated());
             try {
                 executorService.awaitTermination(10, TimeUnit.SECONDS);
-            } catch (InterruptedException ie) {
+            } catch (InterruptedException e) {
                 log.error("Thread pool never terminated");
                 executorService.shutdownNow();
             }
@@ -57,9 +63,11 @@ public final class ThreadPoolFactoryUtils {
      */
     private static ExecutorService createThreadPool(CustomThreadPoolConfig customThreadPoolConfig, String threadNamePrefix, Boolean daemon) {
         ThreadFactory threadFactory = createThreadFactory(threadNamePrefix, daemon);
-        return new ThreadPoolExecutor(customThreadPoolConfig.getCorePoolSize(), customThreadPoolConfig.getMaximumPoolSize(),
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(customThreadPoolConfig.getCorePoolSize(), customThreadPoolConfig.getMaximumPoolSize(),
                 customThreadPoolConfig.getKeepAliveTime(), customThreadPoolConfig.getUnit(), customThreadPoolConfig.getWorkQueue(),
                 threadFactory);
+        printThreadPoolStatus(threadPoolExecutor);
+        return threadPoolExecutor;
     }
 
     /**
@@ -78,6 +86,25 @@ public final class ThreadPoolFactoryUtils {
             }
         }
         return Executors.defaultThreadFactory();
+    }
+
+    /**
+     * 打印线程池的状态
+     *
+     * @param threadPool 线程池对象
+     */
+    public static void printThreadPoolStatus(ThreadPoolExecutor threadPool) {
+        //定时任务类
+        ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1, createThreadFactory("print-thread-pool-status", false));
+        //固定频率1s
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            log.info("============ThreadPool Status=============");
+            log.info("ThreadPool Size: [{}]", threadPool.getPoolSize());
+            log.info("Active Threads: [{}]", threadPool.getActiveCount());
+            log.info("Number of Tasks : [{}]", threadPool.getCompletedTaskCount());
+            log.info("Number of Tasks in Queue: {}", threadPool.getQueue().size());
+            log.info("===========================================");
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
 }
