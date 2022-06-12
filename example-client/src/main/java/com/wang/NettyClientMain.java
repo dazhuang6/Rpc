@@ -18,7 +18,7 @@ public class NettyClientMain {
         //System.out.println("上面的调用卡住之后，这里也不会调用了");使用zookeeper后就可以了
         for (int i = 0; i < 10; i++) {
             String des = helloService.hello(new Hello("111", "~~~" + i));
-            Thread.sleep(500);
+            Thread.sleep(1000);
             System.out.println(des);
         }
     }
