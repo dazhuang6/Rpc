@@ -20,9 +20,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 //服务端:接收客户端消息，并且根据客户端的消息调用相应的方法，然后返回结果给客户端。
 @Slf4j
@@ -61,7 +63,9 @@ public class NettyServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new NettyKryoDecoder(kryoSerializer, RpcRequest.class))
+                            // 30 秒之内没有收到客户端请求的话就关闭连接
+                            ch.pipeline().addLast(new IdleStateHandler(30, 0, 0, TimeUnit.SECONDS))
+                                    .addLast(new NettyKryoDecoder(kryoSerializer, RpcRequest.class))
                                     .addLast(new NettyKryoEncoder(kryoSerializer, RpcResponse.class))
                                     .addLast(new NettyServerHandler());
                         }

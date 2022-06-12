@@ -16,7 +16,7 @@ public class NettyClientMain {
         //assert "Hello description is 222".equals(hello);
 
         //System.out.println("上面的调用卡住之后，这里也不会调用了");使用zookeeper后就可以了
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 10; i++) {
             String des = helloService.hello(new Hello("111", "~~~" + i));
             Thread.sleep(500);
             System.out.println(des);

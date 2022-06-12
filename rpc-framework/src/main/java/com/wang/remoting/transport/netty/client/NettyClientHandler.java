@@ -1,11 +1,20 @@
 package com.wang.remoting.transport.netty.client;
 
+import com.wang.enumeration.RpcMessageTypeEnum;
 import com.wang.factory.SingletonFactory;
+import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.slf4j.Slf4j;
+
+import java.net.InetSocketAddress;
+import java.util.Date;
 
 /**
  * 如果继承自 SimpleChannelInboundHandler 的话就不要考虑 ByteBuf 的释放 ，内部的 channelRead 方法会替你释放 ByteBuf ，
@@ -18,6 +27,17 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
 
     public NettyClientHandler() {
         this.unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("通道激活："+new Date());
+        ctx.fireChannelActive();
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("通道关闭："+new Date());
     }
 
     //读取服务端传输的消息
@@ -37,6 +57,22 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
             unprocessedRequests.complete(rpcResponse);
         } finally {
             ReferenceCountUtil.release(msg);
+        }
+    }
+
+    //发送一个心跳请求
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            IdleState state = ((IdleStateEvent) evt).state();
+            if (state == IdleState.WRITER_IDLE) {
+                log.info("write idle happen [{}]", ctx.channel().remoteAddress());
+                Channel channel = ChannelProvider.get((InetSocketAddress) ctx.channel().remoteAddress());
+                RpcRequest rpcRequest = RpcRequest.builder().rpcMessageTypeEnum(RpcMessageTypeEnum.HEART_BEAT).build();
+                channel.writeAndFlush(rpcRequest).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+            }
+        } else {
+            super.userEventTriggered(ctx, evt);
         }
     }
 

@@ -66,7 +66,7 @@ public final class ThreadPoolFactoryUtils {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(customThreadPoolConfig.getCorePoolSize(), customThreadPoolConfig.getMaximumPoolSize(),
                 customThreadPoolConfig.getKeepAliveTime(), customThreadPoolConfig.getUnit(), customThreadPoolConfig.getWorkQueue(),
                 threadFactory);
-        printThreadPoolStatus(threadPoolExecutor);
+        //printThreadPoolStatus(threadPoolExecutor);
         return threadPoolExecutor;
     }
 
