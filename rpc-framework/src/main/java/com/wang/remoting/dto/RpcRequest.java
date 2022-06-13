@@ -1,6 +1,6 @@
 package com.wang.remoting.dto;
 
-import com.wang.enumeration.RpcMessageTypeEnum;
+import com.wang.enumeration.RpcMessageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,5 +25,5 @@ public class RpcRequest implements Serializable {
     private Object[] parameters;
     private Class<?>[] paramTypes;
     private String requestId;
-    private RpcMessageTypeEnum rpcMessageTypeEnum; //发送心跳
+    private RpcMessageType rpcMessageTypeEnum; //发送心跳
 }

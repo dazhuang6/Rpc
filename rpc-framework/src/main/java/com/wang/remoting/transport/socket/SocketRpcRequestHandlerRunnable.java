@@ -2,7 +2,7 @@ package com.wang.remoting.transport.socket;
 
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
-import com.wang.handler.RpcRequestHandler;
+import com.wang.remoting.handler.RpcRequestHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -17,9 +17,9 @@ import java.net.Socket;
 @Slf4j
 public class SocketRpcRequestHandlerRunnable implements Runnable{
 
-    private Socket socket;
+    private final Socket socket;
 
-    private RpcRequestHandler rpcRequestHandler;
+    private final RpcRequestHandler rpcRequestHandler;
 
     public SocketRpcRequestHandlerRunnable(Socket socket) {
         this.socket = socket;

@@ -1,5 +1,6 @@
-package com.wang.handler;
+package com.wang.remoting.handler;
 
+import com.wang.factory.SingletonFactory;
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
 import com.wang.enumeration.RpcResponseCode;
@@ -17,8 +18,11 @@ import java.lang.reflect.Method;
 @Slf4j
 public class RpcRequestHandler { //请求处理
     //直接在请求处理阶段调用服务注册信息
-    private static ServiceProvider serviceProvider = new ServiceProviderImpl();
+    private final ServiceProvider serviceProvider;
 
+    public RpcRequestHandler() {
+        serviceProvider = SingletonFactory.getInstance(ServiceProviderImpl.class);
+    }
 
     //处理 rpcRequest 然后返回方法执行结果
     public Object handle(RpcRequest rpcRequest){

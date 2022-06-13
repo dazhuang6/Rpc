@@ -1,11 +1,15 @@
 package com.wang;
 
+import com.wang.annotation.RpcService;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Slf4j
+@RpcService
 public class HelloServiceImpl implements HelloService{
+
+    static {
+        System.out.println("HelloServiceImpl被创建");
+    }
 
     @Override
     public String hello(Hello hello) {

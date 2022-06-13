@@ -31,6 +31,10 @@
         <!-- test -->
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
         <junit.platform.version>1.5.2</junit.platform.version>
+        <!-- spring -->
+        <spring.version>5.2.7.RELEASE</spring.version>
+        <!-- zookeeper -->
+        <curator-version>4.2.0</curator-version>
     </properties>
     <dependencies>
         <!-- lombok -->
@@ -76,7 +80,7 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
-            <version>4.0.1</version>
+            <version>${curator-version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.zookeeper</groupId>
@@ -95,7 +99,7 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
-            <version>4.0.1</version>
+            <version>${curator-version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.zookeeper</groupId>
@@ -114,7 +118,7 @@
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
-            <version>3.4.14</version>
+            <version>3.4.6</version>
             <exclusions>
                 <exclusion>
                     <artifactId>netty</artifactId>

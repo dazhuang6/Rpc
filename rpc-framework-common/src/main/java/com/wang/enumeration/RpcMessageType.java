@@ -1,5 +1,5 @@
 package com.wang.enumeration;
 
-public enum RpcMessageTypeEnum {
+public enum RpcMessageType {
     HEART_BEAT //心跳
 }

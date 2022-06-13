@@ -1,11 +1,15 @@
 package com.wang.provider;
 
-import com.wang.enumeration.RpcErrorMessageEnum;
+import com.wang.enumeration.RpcErrorMessage;
 import com.wang.exception.RpcException;
+import com.wang.registry.ServiceRegistry;
+import com.wang.registry.zk.ZkServiceRegistry;
+import com.wang.remoting.transport.netty.server.NettyServer;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,31 +26,45 @@ public class ServiceProviderImpl implements ServiceProvider {
      * key:service/interface name
      * value:service
      */
-    private static Map<String, Object> serviceMap = new ConcurrentHashMap<>(); //使用线程安全的HashMap;
+    private static final Map<String, Object> SERVICE_MAP = new ConcurrentHashMap<>(); //使用线程安全的HashMap;
     //ConcurrentHashMap<K, Boolean>的一个包装器,所有映射值都为 Boolean.TRUE
-    private static Set<String> registeredService = ConcurrentHashMap.newKeySet();
+    private static final Set<String> REGISTERED_SERVICE = ConcurrentHashMap.newKeySet();
 
+    private final ServiceRegistry serviceRegistry = new ZkServiceRegistry();
     /**
      * 将这个对象所有实现的接口都注册进去
      */
     @Override
-    public <T> void addServiceProvider(T service, Class<T> serviceClass) { //线程安全
+    public void addServiceProvider(Object service, Class<?> serviceClass) { //线程安全
         String serviceName = serviceClass.getCanonicalName(); //用于返回基础类的授权名称
-        if (registeredService.contains(serviceName)) {
+        if (REGISTERED_SERVICE.contains(serviceName)) {
             return;
         }
-        registeredService.add(serviceName);
-        serviceMap.put(serviceName, service);
+        REGISTERED_SERVICE.add(serviceName);
+        SERVICE_MAP.put(serviceName, service);
 
         log.info("Add service: {} and interfaces:{}", serviceName, service.getClass().getInterfaces());
     }
 
     @Override
     public Object getServiceProvider(String serviceName) { //线程安全
-        Object service = serviceMap.get(serviceName);
+        Object service = SERVICE_MAP.get(serviceName);
         if (null == service) {
-            throw new RpcException(RpcErrorMessageEnum.SERVICE_CAN_NOT_BE_FOUND);
+            throw new RpcException(RpcErrorMessage.SERVICE_CAN_NOT_BE_FOUND);
         }
         return service;
+    }
+
+    @Override
+    public void publishService(Object service) {
+        try {
+            String host = InetAddress.getLocalHost().getHostAddress();
+            Class<?> anInterface = service.getClass().getInterfaces()[0];
+            this.addServiceProvider(service, anInterface);
+            serviceRegistry.registerService(anInterface.getCanonicalName(), new InetSocketAddress(host, NettyServer.PORT));
+        } catch (UnknownHostException e) {
+            log.error("occur exception when getHostAddress", e);
+        }
+
     }
 }

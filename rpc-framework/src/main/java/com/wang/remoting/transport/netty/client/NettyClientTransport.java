@@ -2,7 +2,7 @@ package com.wang.remoting.transport.netty.client;
 
 import com.wang.factory.SingletonFactory;
 import com.wang.registry.ServiceDiscovery;
-import com.wang.registry.ZkServiceDiscovery;
+import com.wang.registry.zk.ZkServiceDiscovery;
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
 import com.wang.remoting.transport.ClientTransport;
@@ -19,10 +19,12 @@ public class NettyClientTransport implements ClientTransport {
 
     private final ServiceDiscovery serviceDiscovery;
     private final UnprocessedRequests unprocessedRequests;
+    private final ChannelProvider channelProvider;
 
     public NettyClientTransport() {
         this.serviceDiscovery = new ZkServiceDiscovery();
         this.unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
+        this.channelProvider = SingletonFactory.getInstance(ChannelProvider.class);
     }
 
     /**
@@ -32,12 +34,12 @@ public class NettyClientTransport implements ClientTransport {
      * @return 服务端返回的数据
      */
     @Override
-    public CompletableFuture<RpcResponse> sendRpcRequest(RpcRequest rpcRequest) {
+    public CompletableFuture<RpcResponse<Object>> sendRpcRequest(RpcRequest rpcRequest) {
         //原子引用：意味着多个线程试图改变同一个AtomicReference(例如比较和交换操作)将不会使得AtomicReference处于不一致的状态
         //AtomicReference<Object> result = new AtomicReference<>(null);
-        CompletableFuture<RpcResponse> resultFuture = new CompletableFuture<>();
+        CompletableFuture<RpcResponse<Object>> resultFuture = new CompletableFuture<>();
         InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcRequest.getInterfaceName());
-        Channel channel = ChannelProvider.get(inetSocketAddress);
+        Channel channel = channelProvider.get(inetSocketAddress);
         if (channel != null && channel.isActive()) {
             // 放入未处理的请求
             unprocessedRequests.put(rpcRequest.getRequestId(), resultFuture);

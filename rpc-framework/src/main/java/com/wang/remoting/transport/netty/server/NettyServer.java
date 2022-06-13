@@ -3,10 +3,6 @@ package com.wang.remoting.transport.netty.server;
 import com.wang.config.CustomShutdownHook;
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
-import com.wang.provider.ServiceProvider;
-import com.wang.provider.ServiceProviderImpl;
-import com.wang.registry.ServiceRegistry;
-import com.wang.registry.ZkServiceRegistry;
 import com.wang.remoting.transport.netty.coder.kyro.NettyKryoDecoder;
 import com.wang.remoting.transport.netty.coder.kyro.NettyKryoEncoder;
 import com.wang.serialize.kryo.KryoSerializer;
@@ -21,38 +17,26 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Component;
 
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
 //服务端:接收客户端消息，并且根据客户端的消息调用相应的方法，然后返回结果给客户端。
 @Slf4j
-public class NettyServer {
+@Component
+public class NettyServer implements InitializingBean{
+    public static final int PORT = 9998;
 
-    private final String host;
-    private final int port;
-    private final KryoSerializer kryoSerializer;
-    private final ServiceRegistry serviceRegistry;
-    private final ServiceProvider serviceProvider;
+    private final KryoSerializer kryoSerializer = new KryoSerializer();
 
-    public NettyServer(String host, int port) {
-        this.host = host;
-        this.port = port;
-        kryoSerializer = new KryoSerializer();
-        serviceRegistry = new ZkServiceRegistry();
-        serviceProvider = new ServiceProviderImpl();
-    }
-
-    public <T> void publishService(T service, Class<T> serviceClass){
-        serviceProvider.addServiceProvider(service, serviceClass);
-        serviceRegistry.registerService(serviceClass.getCanonicalName(), new InetSocketAddress(host, port));
-        start();
-    }
-
+    @SneakyThrows
     public void start(){
-        //取消注册服务
-        CustomShutdownHook.getCustomShutdownHook().clearAll();
+        String host = InetAddress.getLocalHost().getHostAddress();
+
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -78,7 +62,7 @@ public class NettyServer {
 //                    .option(ChannelOption.SO_KEEPALIVE, true); 开启TCP底层心跳机制，会报错，因为这个版本没用这个配置选项
 
             //绑定端口，同步等待绑定成功
-            ChannelFuture f = b.bind(host, port).sync();
+            ChannelFuture f = b.bind(host, PORT).sync();
             //等待服务端监听窗口关闭
             f.channel().closeFuture().sync();
 
@@ -90,4 +74,13 @@ public class NettyServer {
             workerGroup.shutdownGracefully();
         }
     }
+
+    /**
+     * Called after setting all bean properties
+     */
+    @Override
+    public void afterPropertiesSet() {
+        CustomShutdownHook.getCustomShutdownHook().clearAll();
+    }
+
 }

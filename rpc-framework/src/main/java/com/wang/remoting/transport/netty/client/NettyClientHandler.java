@@ -1,6 +1,6 @@
 package com.wang.remoting.transport.netty.client;
 
-import com.wang.enumeration.RpcMessageTypeEnum;
+import com.wang.enumeration.RpcMessageType;
 import com.wang.factory.SingletonFactory;
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
@@ -24,9 +24,11 @@ import java.util.Date;
 @Slf4j
 public class NettyClientHandler extends ChannelInboundHandlerAdapter {
     private final UnprocessedRequests unprocessedRequests;
+    private final ChannelProvider channelProvider;
 
     public NettyClientHandler() {
         this.unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
+        this.channelProvider = SingletonFactory.getInstance(ChannelProvider.class);
     }
 
     @Override
@@ -45,7 +47,10 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
             log.info(String.format("client receive msg: %s", msg));
-            RpcResponse rpcResponse = (RpcResponse) msg;
+            if (msg instanceof RpcResponse) {
+                RpcResponse<Object> rpcResponse = (RpcResponse<Object>) msg;
+                unprocessedRequests.complete(rpcResponse);
+            }
 
             //声明一个AttributeKey对象
             //AttributeKey<RpcResponse> key = AttributeKey.valueOf("rpcResponse" + rpcResponse.getRequestId());
@@ -53,8 +58,6 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
             //AttributeMap的key是AttributeKey，value是Attribute
             //ctx.channel().attr(key).set(rpcResponse);
             //ctx.channel().close();
-
-            unprocessedRequests.complete(rpcResponse);
         } finally {
             ReferenceCountUtil.release(msg);
         }
@@ -67,8 +70,8 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
             IdleState state = ((IdleStateEvent) evt).state();
             if (state == IdleState.WRITER_IDLE) {
                 log.info("write idle happen [{}]", ctx.channel().remoteAddress());
-                Channel channel = ChannelProvider.get((InetSocketAddress) ctx.channel().remoteAddress());
-                RpcRequest rpcRequest = RpcRequest.builder().rpcMessageTypeEnum(RpcMessageTypeEnum.HEART_BEAT).build();
+                Channel channel = channelProvider.get((InetSocketAddress) ctx.channel().remoteAddress());
+                RpcRequest rpcRequest = RpcRequest.builder().rpcMessageTypeEnum(RpcMessageType.HEART_BEAT).build();
                 channel.writeAndFlush(rpcRequest).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             }
         } else {

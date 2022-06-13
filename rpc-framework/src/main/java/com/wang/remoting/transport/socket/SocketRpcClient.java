@@ -2,7 +2,7 @@ package com.wang.remoting.transport.socket;
 
 import com.wang.exception.RpcException;
 import com.wang.registry.ServiceDiscovery;
-import com.wang.registry.ZkServiceDiscovery;
+import com.wang.registry.zk.ZkServiceDiscovery;
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.transport.ClientTransport;
 import lombok.AllArgsConstructor;

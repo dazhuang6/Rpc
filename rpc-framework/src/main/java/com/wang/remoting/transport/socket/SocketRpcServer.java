@@ -4,7 +4,7 @@ import com.wang.config.CustomShutdownHook;
 import com.wang.provider.ServiceProvider;
 import com.wang.provider.ServiceProviderImpl;
 import com.wang.registry.ServiceRegistry;
-import com.wang.registry.ZkServiceRegistry;
+import com.wang.registry.zk.ZkServiceRegistry;
 import com.wang.utils.concurrent.ThreadPoolFactoryUtils;
 import lombok.extern.slf4j.Slf4j;
 

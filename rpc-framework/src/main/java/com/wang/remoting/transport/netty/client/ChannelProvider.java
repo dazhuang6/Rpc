@@ -11,38 +11,36 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public final class ChannelProvider {
 
-    private static Map<String, Channel> channels = new ConcurrentHashMap<>();
-    private static NettyClient nettyClient;
+    private final Map<String, Channel> channelMap;
+    private final NettyClient nettyClient;
 
-    static {
+    public ChannelProvider() {
+        channelMap = new ConcurrentHashMap<>();
         nettyClient = SingletonFactory.getInstance(NettyClient.class);
     }
 
-    private ChannelProvider() {
-    }
-
     //重用Channel避免重复连接服务端
-    public static Channel get(InetSocketAddress inetSocketAddress) {
+    public Channel get(InetSocketAddress inetSocketAddress) {
         String key = inetSocketAddress.toString();
         // 已经有可用连接就直接取
-        if (channels.containsKey(key)) {
-            Channel channel = channels.get(key);
+        if (channelMap.containsKey(key)) {
+            Channel channel = channelMap.get(key);
             if (channel != null && channel.isActive()) {
                 return channel;
             } else {
-                channels.remove(key);
+                channelMap.remove(key);
             }
         }
         //否则，重新连接获取Channel
         Channel channel = nettyClient.doConnect(inetSocketAddress);
-        channels.put(key, channel);
+        channelMap.put(key, channel);
         return channel;
     }
 
-    public static void remove(InetSocketAddress inetSocketAddress) {
+    public void remove(InetSocketAddress inetSocketAddress) {
         String key = inetSocketAddress.toString();
-        channels.remove(key);
-        log.info("Channel map size :[{}]", channels.size());
+        channelMap.remove(key);
+        log.info("Channel map size :[{}]", channelMap.size());
     }
 
 }

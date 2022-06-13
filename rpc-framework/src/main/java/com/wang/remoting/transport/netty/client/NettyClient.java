@@ -24,13 +24,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public final class NettyClient {
 
-    private static Bootstrap bootstrap; //引导启动类
-    private static EventLoopGroup eventLoopGroup;
-
-    public NettyClient(){}
+    private final Bootstrap bootstrap; //引导启动类
+    private final EventLoopGroup eventLoopGroup;
 
     // 初始化相关资源比如 EventLoopGroup、Bootstrap
-    static {
+    public NettyClient(){
         eventLoopGroup = new NioEventLoopGroup();
         bootstrap = new Bootstrap();
         KryoSerializer kryoSerializer = new KryoSerializer();

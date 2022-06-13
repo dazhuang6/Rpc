@@ -1,8 +1,8 @@
 package com.wang.remoting.transport.netty.server;
 
-import com.wang.enumeration.RpcMessageTypeEnum;
+import com.wang.enumeration.RpcMessageType;
 import com.wang.factory.SingletonFactory;
-import com.wang.handler.RpcRequestHandler;
+import com.wang.remoting.handler.RpcRequestHandler;
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
 import com.wang.utils.concurrent.CustomThreadPoolConfig;
@@ -43,7 +43,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                 log.info(String.format("server receive msg: %s", msg));
                 RpcRequest rpcRequest = (RpcRequest) msg;
                 //处理心跳请求
-                if (rpcRequest.getRpcMessageTypeEnum() == RpcMessageTypeEnum.HEART_BEAT) {
+                if (rpcRequest.getRpcMessageTypeEnum() == RpcMessageType.HEART_BEAT) {
                     log.info("receive heat beat msg from client");
                     return;
                 }
