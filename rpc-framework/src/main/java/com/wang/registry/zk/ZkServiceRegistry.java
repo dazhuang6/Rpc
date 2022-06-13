@@ -12,10 +12,10 @@ public class ZkServiceRegistry implements ServiceRegistry {
 
     //InetSocketAddress类主要作用是封装端口,在InetAddress基础上加端口
     @Override
-    public void registerService(String serviceName, InetSocketAddress inetSocketAddress) {
+    public void registerService(String rpcServiceName, InetSocketAddress inetSocketAddress) {
         //根节点下注册子节点：服务
         //服务子节点下注册子节点：服务地址
-        String servicePath = CuratorUtil.ZK_REGISTER_ROOT_PATH + "/" + serviceName + inetSocketAddress.toString();
+        String servicePath = CuratorUtil.ZK_REGISTER_ROOT_PATH + "/" + rpcServiceName + inetSocketAddress.toString();
         CuratorFramework zkClient = CuratorUtil.getZkClient();
         CuratorUtil.creatPersistentNode(zkClient, servicePath);
     }

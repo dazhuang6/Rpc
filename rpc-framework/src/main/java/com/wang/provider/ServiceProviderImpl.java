@@ -42,7 +42,7 @@ public class ServiceProviderImpl implements ServiceProvider {
      * 将这个对象所有实现的接口都注册进去
      */
     @Override
-    public void addServiceProvider(Object service, Class<?> serviceClass, RpcServiceProperties rpcServiceProperties) { //线程安全
+    public void addService(Object service, Class<?> serviceClass, RpcServiceProperties rpcServiceProperties) { //线程安全
         //String serviceName = serviceClass.getCanonicalName(); //用于返回基础类的授权名称
         String rpcServiceName = rpcServiceProperties.toRpcServiceName();
         if (registeredService.contains(rpcServiceName)) {
@@ -55,7 +55,7 @@ public class ServiceProviderImpl implements ServiceProvider {
     }
 
     @Override
-    public Object getServiceProvider(RpcServiceProperties rpcServiceProperties) { //线程安全
+    public Object getService(RpcServiceProperties rpcServiceProperties) { //线程安全
         Object service = serviceMap.get(rpcServiceProperties.toRpcServiceName());
         if (null == service) {
             throw new RpcException(RpcErrorMessage.SERVICE_CAN_NOT_BE_FOUND);
@@ -77,7 +77,7 @@ public class ServiceProviderImpl implements ServiceProvider {
             String serviceName = serviceRelatedInterface.getCanonicalName(); //用于返回基础类的授权名称
             rpcServiceProperties.setServiceName(serviceName);
 
-            this.addServiceProvider(service, serviceRelatedInterface, rpcServiceProperties);
+            this.addService(service, serviceRelatedInterface, rpcServiceProperties);
             serviceRegistry.registerService(rpcServiceProperties.toRpcServiceName(), new InetSocketAddress(host, NettyServer.PORT));
         } catch (UnknownHostException e) {
             log.error("occur exception when getHostAddress", e);

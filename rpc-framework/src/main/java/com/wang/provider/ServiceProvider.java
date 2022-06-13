@@ -13,7 +13,7 @@ public interface ServiceProvider {
      * @param serviceClass 服务实例对象实现的接口类
      * @param rpcServiceProperties 服务关联对象
      */
-    void addServiceProvider(Object service, Class<?> serviceClass, RpcServiceProperties rpcServiceProperties);
+    void addService(Object service, Class<?> serviceClass, RpcServiceProperties rpcServiceProperties);
 
 
     /**
@@ -22,7 +22,7 @@ public interface ServiceProvider {
      * @param rpcServiceProperties 服务关联对象
      * @return 服务实例对象
      */
-    Object getServiceProvider(RpcServiceProperties rpcServiceProperties);
+    Object getService(RpcServiceProperties rpcServiceProperties);
 
     /**
      * 发布服务

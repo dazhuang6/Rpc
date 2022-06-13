@@ -10,7 +10,7 @@ public class NettyClientMain2 {
         ClientTransport rpcClient = new NettyClientTransport();
 
         RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder()
-                .group("test2").version("version1").build();
+                .group("test2").version("version2").build();
 
         RpcClientProxy rpcClientProxy = new RpcClientProxy(rpcClient, rpcServiceProperties);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);

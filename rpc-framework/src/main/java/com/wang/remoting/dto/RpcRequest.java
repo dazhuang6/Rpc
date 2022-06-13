@@ -1,5 +1,6 @@
 package com.wang.remoting.dto;
 
+import com.wang.entity.RpcServiceProperties;
 import com.wang.enumeration.RpcMessageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,4 +30,14 @@ public class RpcRequest implements Serializable {
 
     private String version;
     private String group;
+
+    /**
+     * 通过调用请求的接口，版本，组建立服务配置类，然后可以通过这个配置类得到配置名
+     * @return
+     */
+    public RpcServiceProperties toRpcProperties() {
+        return RpcServiceProperties.builder().serviceName(this.getInterfaceName())
+                .version(this.getVersion())
+                .group(this.getGroup()).build();
+    }
 }

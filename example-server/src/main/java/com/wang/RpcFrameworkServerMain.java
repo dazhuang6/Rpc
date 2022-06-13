@@ -8,11 +8,8 @@ import com.wang.serviceImpl.HelloServiceImpl;
 public class RpcFrameworkServerMain {
     public static void main(String[] args) {
         HelloService helloService = new HelloServiceImpl();
-        SocketRpcServer socketRpcServer = new SocketRpcServer("127.0.0.1", 9999);
+        SocketRpcServer socketRpcServer = new SocketRpcServer();
+        socketRpcServer.registerService(helloService);
         socketRpcServer.start();
-
-        ServiceProvider serviceProvider = new ServiceProviderImpl();
-        serviceProvider.publishService(helloService);
-
     }
 }

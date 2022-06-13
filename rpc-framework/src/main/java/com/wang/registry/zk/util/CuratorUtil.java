@@ -1,6 +1,6 @@
 package com.wang.registry.zk.util;
 
-import com.wang.enumeration.RpcProperties;
+import com.wang.enumeration.RpcConfigProperties;
 import com.wang.exception.RpcException;
 import com.wang.utils.file.PropertiesFileUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,6 @@ import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
 
 import java.util.*;
@@ -39,9 +38,9 @@ public final class CuratorUtil {
     //framework框架， curator监护人
     public static CuratorFramework getZkClient() {
         // check if user has set zk address
-        Properties properties = PropertiesFileUtils.readPropertiesFile(RpcProperties.RPC_CONFIG_PATH.getPropertyValue());
+        Properties properties = PropertiesFileUtils.readPropertiesFile(RpcConfigProperties.RPC_CONFIG_PATH.getPropertyValue());
         if (properties != null) {
-            defaultZookeeperAddress = properties.getProperty(RpcProperties.ZK_ADDRESS.getPropertyValue());
+            defaultZookeeperAddress = properties.getProperty(RpcConfigProperties.ZK_ADDRESS.getPropertyValue());
         }
         // if zkClient has been started, return directly
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
@@ -84,16 +83,16 @@ public final class CuratorUtil {
     /**
      * 获取某个字节下的子节点,也就是获取所有提供服务的生产者的地址
      */
-    public static List<String> getChildrenNodes(CuratorFramework zkClient, String serviceName){
-        if (SERVICE_ADDRESS_MAP.containsKey(serviceName)) {
-            return SERVICE_ADDRESS_MAP.get(serviceName);
+    public static List<String> getChildrenNodes(CuratorFramework zkClient, String rpcServiceName){
+        if (SERVICE_ADDRESS_MAP.containsKey(rpcServiceName)) {
+            return SERVICE_ADDRESS_MAP.get(rpcServiceName);
         }
         List<String> result = Collections.emptyList();
-        String servicePath = ZK_REGISTER_ROOT_PATH + "/" + serviceName;
+        String servicePath = ZK_REGISTER_ROOT_PATH + "/" + rpcServiceName;
         try {
             result = zkClient.getChildren().forPath(servicePath); //获取节点的所有子节点路径
-            SERVICE_ADDRESS_MAP.put(serviceName, result);
-            registerWatcher(serviceName, zkClient); //对该节点注册监听器
+            SERVICE_ADDRESS_MAP.put(rpcServiceName, result);
+            registerWatcher(rpcServiceName, zkClient); //对该节点注册监听器
         } catch (Exception e){
             throw new RpcException(e.getMessage(), e.getCause());
         }
@@ -102,15 +101,15 @@ public final class CuratorUtil {
 
     /**
      * 子节点监听器
-     * @param serviceName 服务名称
+     * @param rpcServiceName 服务名称
      */
-    private static void registerWatcher(String serviceName, CuratorFramework zkClient){
-        String servicePath = ZK_REGISTER_ROOT_PATH + "/" + serviceName;
+    private static void registerWatcher(String rpcServiceName, CuratorFramework zkClient){
+        String servicePath = ZK_REGISTER_ROOT_PATH + "/" + rpcServiceName;
         //给某个节点注册子节点监听器。之后，这个节点的子节点发生变化的时候可以自定义回调操作。
         PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, servicePath, true);
         PathChildrenCacheListener pathChildrenCacheListener = (curatorFramework, pathChildrenCacheEvent) -> {
             List<String> serviceAddresses = curatorFramework.getChildren().forPath(servicePath);
-            SERVICE_ADDRESS_MAP.put(serviceName, serviceAddresses);
+            SERVICE_ADDRESS_MAP.put(rpcServiceName, serviceAddresses);
         };
         pathChildrenCache.getListenable().addListener(pathChildrenCacheListener);
         try {

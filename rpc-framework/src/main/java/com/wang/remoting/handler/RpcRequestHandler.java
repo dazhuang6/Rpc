@@ -25,13 +25,11 @@ public class RpcRequestHandler { //请求处理
 
     //处理 rpcRequest 然后返回方法执行结果
     public Object handle(RpcRequest rpcRequest){
-        RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder().serviceName(rpcRequest.getInterfaceName())
-                .version(rpcRequest.getVersion())
-                .group(rpcRequest.getGroup()).build();
+        RpcServiceProperties rpcServiceProperties = rpcRequest.toRpcProperties();
         //通过注册中心获取到目标类（客户端需要调用类）
-        Object service = serviceProvider.getServiceProvider(rpcServiceProperties);
+        Object service = serviceProvider.getService(rpcServiceProperties);
 
-        log.info("service:{} successful invoke method:{}", rpcRequest.getInterfaceName(), rpcRequest.getMethodName());
+        //log.info("service:{} successful invoke method:{}", rpcRequest.getInterfaceName(), rpcRequest.getMethodName());
         return invokeTargetMethod(rpcRequest, service);
     }
 

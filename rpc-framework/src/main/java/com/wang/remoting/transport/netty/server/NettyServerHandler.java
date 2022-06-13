@@ -1,6 +1,7 @@
 package com.wang.remoting.transport.netty.server;
 
 import com.wang.enumeration.RpcMessageType;
+import com.wang.enumeration.RpcResponseCode;
 import com.wang.factory.SingletonFactory;
 import com.wang.remoting.handler.RpcRequestHandler;
 import com.wang.remoting.dto.RpcRequest;
@@ -56,6 +57,8 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                     //监听通道的状态
                     ctx.writeAndFlush(rpcResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 } else {
+                    RpcResponse<Object> rpcResponse = RpcResponse.fail(RpcResponseCode.FAIL);
+                    ctx.writeAndFlush(rpcResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                     log.error("not writable now, message dropped");
                 }
 

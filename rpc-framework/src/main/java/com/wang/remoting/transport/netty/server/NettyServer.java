@@ -1,6 +1,10 @@
 package com.wang.remoting.transport.netty.server;
 
 import com.wang.config.CustomShutdownHook;
+import com.wang.entity.RpcServiceProperties;
+import com.wang.factory.SingletonFactory;
+import com.wang.provider.ServiceProvider;
+import com.wang.provider.ServiceProviderImpl;
 import com.wang.remoting.dto.RpcRequest;
 import com.wang.remoting.dto.RpcResponse;
 import com.wang.remoting.transport.netty.coder.kyro.NettyKryoDecoder;
@@ -32,6 +36,16 @@ public class NettyServer implements InitializingBean{
     public static final int PORT = 9999;
 
     private final KryoSerializer kryoSerializer = new KryoSerializer();
+
+    private final ServiceProvider serviceProvider = SingletonFactory.getInstance(ServiceProviderImpl.class);
+
+    public void registerService(Object service) {
+        serviceProvider.publishService(service);
+    }
+
+    public void registerService(Object service, RpcServiceProperties rpcServiceProperties) {
+        serviceProvider.publishService(service, rpcServiceProperties);
+    }
 
     @SneakyThrows
     public void start(){

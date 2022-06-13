@@ -41,8 +41,7 @@ public class NettyClientTransport implements ClientTransport {
         CompletableFuture<RpcResponse<Object>> resultFuture = new CompletableFuture<>();
 
         // 通过请求建立服务名称
-        String rpcServiceName = RpcServiceProperties.builder().serviceName(rpcRequest.getInterfaceName())
-                .group(rpcRequest.getGroup()).version(rpcRequest.getVersion()).build().toRpcServiceName();
+        String rpcServiceName = rpcRequest.toRpcProperties().toRpcServiceName();
 
         // 获取服务地址
         InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcServiceName);
