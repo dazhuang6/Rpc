@@ -26,4 +26,7 @@ public class RpcRequest implements Serializable {
     private Class<?>[] paramTypes;
     private String requestId;
     private RpcMessageType rpcMessageTypeEnum; //发送心跳
+
+    private String version;
+    private String group;
 }

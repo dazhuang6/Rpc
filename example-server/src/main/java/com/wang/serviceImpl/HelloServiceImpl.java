@@ -1,11 +1,13 @@
-package com.wang;
+package com.wang.serviceImpl;
 
+import com.wang.Hello;
+import com.wang.HelloService;
 import com.wang.annotation.RpcService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RpcService
-public class HelloServiceImpl implements HelloService{
+@RpcService(group = "test1", version = "version1")
+public class HelloServiceImpl implements HelloService {
 
     static {
         System.out.println("HelloServiceImpl被创建");

@@ -1,5 +1,6 @@
 package com.wang.remoting.transport.netty.client;
 
+import com.wang.entity.RpcServiceProperties;
 import com.wang.factory.SingletonFactory;
 import com.wang.registry.ServiceDiscovery;
 import com.wang.registry.zk.ZkServiceDiscovery;
@@ -38,7 +39,14 @@ public class NettyClientTransport implements ClientTransport {
         //原子引用：意味着多个线程试图改变同一个AtomicReference(例如比较和交换操作)将不会使得AtomicReference处于不一致的状态
         //AtomicReference<Object> result = new AtomicReference<>(null);
         CompletableFuture<RpcResponse<Object>> resultFuture = new CompletableFuture<>();
-        InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcRequest.getInterfaceName());
+
+        // 通过请求建立服务名称
+        String rpcServiceName = RpcServiceProperties.builder().serviceName(rpcRequest.getInterfaceName())
+                .group(rpcRequest.getGroup()).version(rpcRequest.getVersion()).build().toRpcServiceName();
+
+        // 获取服务地址
+        InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcServiceName);
+
         Channel channel = channelProvider.get(inetSocketAddress);
         if (channel != null && channel.isActive()) {
             // 放入未处理的请求

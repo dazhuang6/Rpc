@@ -1,6 +1,7 @@
-package com.wang.remoting.transport.netty.server;
+package com.wang.spring;
 
 import com.wang.annotation.RpcService;
+import com.wang.entity.RpcServiceProperties;
 import com.wang.factory.SingletonFactory;
 import com.wang.provider.ServiceProvider;
 import com.wang.provider.ServiceProviderImpl;
@@ -24,7 +25,14 @@ public class SpringBeanPostProcessor implements BeanPostProcessor {
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean.getClass().isAnnotationPresent(RpcService.class)) {
             log.info("[{}] is annotated with [{}]", bean.getClass().getName(), RpcService.class.getCanonicalName());
-            serviceProvider.publishService(bean);
+            //serviceProvider.publishService(bean);
+
+            // 获取注解
+            RpcService rpcService = bean.getClass().getAnnotation(RpcService.class);
+            // 构建服务配置
+            RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder()
+                    .group(rpcService.group()).version(rpcService.version()).build();
+            serviceProvider.publishService(bean, rpcServiceProperties);
         }
         return bean;
     }

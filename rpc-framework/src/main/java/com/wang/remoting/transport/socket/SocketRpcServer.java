@@ -1,6 +1,7 @@
 package com.wang.remoting.transport.socket;
 
 import com.wang.config.CustomShutdownHook;
+import com.wang.factory.SingletonFactory;
 import com.wang.provider.ServiceProvider;
 import com.wang.provider.ServiceProviderImpl;
 import com.wang.registry.ServiceRegistry;
@@ -23,21 +24,12 @@ public class SocketRpcServer {
 
     private final String host;
     private final int port;
-    private final ServiceRegistry serviceRegistry;
-    private final ServiceProvider serviceProvider;
 
     public SocketRpcServer(String host, int port) { //通过注入服务来调用RpcServer
         this.host = host;
         this.port = port;
         threadPool = ThreadPoolFactoryUtils.createCustomThreadPoolIfAbsent("socket-server-rpc-pool");
-        serviceRegistry = new ZkServiceRegistry();
-        serviceProvider = new ServiceProviderImpl();
-    }
-
-    public <T> void publicService(T service, Class<T> serviceClass) {
-        serviceProvider.addServiceProvider(service,serviceClass);
-        serviceRegistry.registerService(serviceClass.getCanonicalName(), new InetSocketAddress(host, port));
-        start();
+        SingletonFactory.getInstance(ServiceProviderImpl.class);
     }
 
     /**

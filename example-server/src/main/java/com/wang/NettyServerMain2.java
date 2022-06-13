@@ -1,8 +1,10 @@
 package com.wang;
 
+import com.wang.entity.RpcServiceProperties;
 import com.wang.provider.ServiceProvider;
 import com.wang.provider.ServiceProviderImpl;
 import com.wang.remoting.transport.netty.server.NettyServer;
+import com.wang.serviceImpl.HelloServiceImpl;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class NettyServerMain2 {
@@ -14,6 +16,9 @@ public class NettyServerMain2 {
         nettyServer.start();
 
         ServiceProvider serviceProvider = new ServiceProviderImpl();
-        serviceProvider.publishService(helloService);
+
+        RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder()
+                .group("test").version("1").build();
+        serviceProvider.publishService(helloService, rpcServiceProperties);
     }
 }

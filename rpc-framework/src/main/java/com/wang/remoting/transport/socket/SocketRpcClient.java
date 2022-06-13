@@ -1,5 +1,6 @@
 package com.wang.remoting.transport.socket;
 
+import com.wang.entity.RpcServiceProperties;
 import com.wang.exception.RpcException;
 import com.wang.registry.ServiceDiscovery;
 import com.wang.registry.zk.ZkServiceDiscovery;
@@ -26,7 +27,12 @@ public class SocketRpcClient implements ClientTransport {
 
     @Override
     public Object sendRpcRequest(RpcRequest rpcRequest) {
-        InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcRequest.getInterfaceName());
+        // 通过请求建立服务名称
+        String rpcServiceName = RpcServiceProperties.builder().serviceName(rpcRequest.getInterfaceName())
+                .group(rpcRequest.getGroup()).version(rpcRequest.getVersion()).build().toRpcServiceName();
+
+        InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcServiceName);
+
         try (Socket socket = new Socket()){
             socket.connect(inetSocketAddress);//通过inetSocket连接
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());//对象输出流

@@ -1,17 +1,16 @@
 package com.wang;
 
 import com.wang.entity.RpcServiceProperties;
-import com.wang.remoting.transport.ClientTransport;
 import com.wang.proxy.RpcClientProxy;
+import com.wang.remoting.transport.ClientTransport;
 import com.wang.remoting.transport.netty.client.NettyClientTransport;
-import org.apache.log4j.spi.ThrowableRenderer;
 
-public class NettyClientMain {
+public class NettyClientMain2 {
     public static void main(String[] args) throws InterruptedException {
         ClientTransport rpcClient = new NettyClientTransport();
 
         RpcServiceProperties rpcServiceProperties = RpcServiceProperties.builder()
-                .group("test1").version("version1").build();
+                .group("test2").version("version1").build();
 
         RpcClientProxy rpcClientProxy = new RpcClientProxy(rpcClient, rpcServiceProperties);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);

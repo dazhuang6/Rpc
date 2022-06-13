@@ -8,6 +8,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import org.springframework.stereotype.Component;
 
+/**
+ * 标注服务实现类
+ */
 @Documented //标记这些注解是否包含在用户文档中
 @Retention(RetentionPolicy.RUNTIME) //标识这个注解怎么保存，是只在代码中，还是编入class文件中，或者是在运行时可以通过反射访问
 @Target({ElementType.TYPE}) //标记这个注解应该是哪种 Java 成员

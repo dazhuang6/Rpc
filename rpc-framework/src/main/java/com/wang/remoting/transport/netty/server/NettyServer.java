@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class NettyServer implements InitializingBean{
-    public static final int PORT = 9998;
+    public static final int PORT = 9999;
 
     private final KryoSerializer kryoSerializer = new KryoSerializer();
 
@@ -59,7 +59,7 @@ public class NettyServer implements InitializingBean{
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     //表示系统用于临时存放已完成三次握手的请求的队列的最大长度,如果连接建立频繁，服务器处理创建新连接较慢，可以适当调大这个参数
                     .option(ChannelOption.SO_BACKLOG, 128);
-//                    .option(ChannelOption.SO_KEEPALIVE, true); 开启TCP底层心跳机制，会报错，因为这个版本没用这个配置选项
+                    //.option(ChannelOption.SO_KEEPALIVE, true); 开启TCP底层心跳机制，会报错，因为这个版本没用这个配置选项
 
             //绑定端口，同步等待绑定成功
             ChannelFuture f = b.bind(host, PORT).sync();
@@ -77,6 +77,7 @@ public class NettyServer implements InitializingBean{
 
     /**
      * Called after setting all bean properties
+     * 添加钩子函数吗，交代后事
      */
     @Override
     public void afterPropertiesSet() {
